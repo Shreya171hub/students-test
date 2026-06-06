@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matrix Worksheet System — Class 12 Maths</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f1e;
+  --surface:#111827;
+  --surface2:#1a2332;
+  --border:#1e2d42;
+  --accent:#3b82f6;
+  --accent2:#6366f1;
+  --green:#10b981;
+  --red:#ef4444;
+  --amber:#f59e0b;
+  --text:#f1f5f9;
+  --muted:#64748b;
+  --font:'Sora',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(59,130,246,0.15),transparent),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(99,102,241,0.1),transparent);pointer-events:none;z-index:0}
+
+.page{display:none;min-height:100vh;position:relative;z-index:1}
+.page.active{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:440px;position:relative}
+.card::before{content:'';position:absolute;inset:0;border-radius:16px;padding:1px;background:linear-gradient(135deg,rgba(59,130,246,0.3),transparent,rgba(99,102,241,0.2));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.3px}
+.logo-sub{font-size:12px;color:var(--muted);font-weight:400}
+
+h1{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+h2{font-size:18px;font-weight:600;margin-bottom:1.5rem}
+.subtitle{font-size:13px;color:var(--muted);margin-bottom:2rem;line-height:1.6}
+
+/* Form */
+.form-group{margin-bottom:1.2rem}
+label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:8px}
+input,select{width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s}
+input:focus,select:focus{border-color:var(--accent)}
+select option{background:var(--surface2)}
+
+/* Buttons */
+.btn{width:100%;padding:13px;border-radius:10px;border:none;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
+.btn-primary:active{transform:translateY(0)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:10px}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{width:auto;padding:8px 16px;font-size:12px;border-radius:8px}
+.btn-green{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+.btn-red{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
+
+/* OTP */
+.otp-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:1.5rem}
+.otp-grid input{padding:14px 0;text-align:center;font-size:20px;font-weight:700;font-family:var(--mono);border-radius:10px}
+
+/* Upload */
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1.5rem}
+.upload-area:hover{border-color:var(--accent);background:rgba(59,130,246,0.05)}
+.upload-area.has-file{border-color:var(--green);background:rgba(16,185,129,0.05)}
+.upload-icon{font-size:36px;margin-bottom:10px}
+.upload-text{font-size:14px;color:var(--muted)}
+.upload-preview{max-width:100%;border-radius:8px;margin-top:10px;max-height:200px;object-fit:cover;display:none}
+
+/* Status badges */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-pending{background:rgba(100,116,139,0.2);color:var(--muted)}
+.badge-submitted{background:rgba(245,158,11,0.15);color:var(--amber)}
+.badge-scored{background:rgba(16,185,129,0.15);color:var(--green)}
+.badge-fail{background:rgba(239,68,68,0.15);color:var(--red)}
+
+/* Teacher dashboard */
+.dash-full{max-width:1000px;width:100%;padding:2rem}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+.tabs{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface2);padding:4px;border-radius:10px}
+.tab-btn{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:13px;border-radius:8px;cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:var(--surface);color:var(--text);font-weight:600}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:10px 14px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.score-cell{font-family:var(--mono);font-weight:600;font-size:14px}
+.score-high{color:var(--green)}
+.score-mid{color:var(--amber)}
+.score-low{color:var(--red)}
+
+/* Submission review */
+.sub-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.sub-img{width:100%;border-radius:8px;margin:10px 0;max-height:300px;object-fit:contain;background:#000;cursor:pointer}
+.sub-img:hover{opacity:0.9}
+.score-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.score-form input{width:80px;text-align:center;font-weight:700;font-size:16px}
+.ai-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(99,102,241,0.2));color:var(--accent);border:1px solid rgba(59,130,246,0.3)}
+
+/* Alerts */
+.alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.alert-success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green)}
+.alert-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red)}
+.alert-info{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--accent)}
+
+/* Progress bar */
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.5s}
+
+/* Loading spinner */
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.ai-checking{text-align:center;padding:2rem}
+.ai-checking .spinner{width:40px;height:40px;border-width:3px;margin-bottom:1rem}
+
+/* Image lightbox */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain}
+
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+.chip{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;background:rgba(59,130,246,0.15);color:var(--accent);border:1px solid rgba(59,130,246,0.2);margin:2px}
+
+@media(max-width:600px){
+  .card{padding:1.5rem}
+  .otp-grid{gap:6px}
+  .otp-grid input{padding:12px 0;font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="document.getElementById('lightbox').classList.remove('open')">
+  <img id="lightboxImg" src="" alt="Worksheet">
+</div>
+
+<!-- PAGE 1: SELECT ROLE -->
+<div class="page active" id="page-role">
+  <div class="card" style="text-align:center">
+    <div class="logo" style="justify-content:center;margin-bottom:1.5rem">
+      <div class="logo-icon">📐</div>
+      <div><div class="logo-text">Matrix Worksheet System</div><div class="logo-sub">Class 12 Maths — CBSE</div></div>
+    </div>
+    <h1 style="margin-bottom:8px">Welcome</h1>
+    <p class="subtitle">Select your role to continue</p>
+    <button class="btn btn-primary" onclick="gotoPage('page-student-login')" style="margin-bottom:12px">🎓 I am a Student / Parent</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-teacher-login')">🔐 I am the Teacher</button>
+    <div style="margin-top:1.5rem;font-size:12px;color:var(--muted)">Nitin Kumar Sir • CBSE Class 12 Maths • Sambhal, UP</div>
+  </div>
+</div>
+
+<!-- PAGE 2: STUDENT LOGIN -->
+<div class="page" id="page-student-login">
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <div><div class="logo-text">Student Login</div><div class="logo-sub">Matrix — Class 12</div></div>
+    </div>
+    <h2>Select your name</h2>
+    <div class="form-group">
+      <label>Your name</label>
+      <select id="studentSelect">
+        <option value="">— Choose your name —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Your mobile number (for OTP)</label>
+      <input type="tel" id="studentPhone" placeholder="Enter 10-digit mobile number" maxlength="10">
+    </div>
+    <div id="loginAlert"></div>
+    <button class="btn btn-primary" onclick="sendOTP()">Send OTP →</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-role')">← Back</button>
+  </div>
+</div>
+
+<!-- PAGE 3: OTP VERIFY -->
+<div class="page" id="page-otp">
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">🔒</div>
+      <div><div class="logo-text">Verify OTP</div><div class="logo-sub">Check your SMS</div></div>
+    </div>
+    <h2>Enter 6-digit OTP</h2>
+    <p class="subtitle" id="otpSentMsg">OTP sent to your number</p>
+    <div class="otp-grid" id="otpGrid">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,0)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,1)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,2)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,3)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,4)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,5)">
+    </div>
+    <div id="otpAlert"></div>
+    <button class="btn btn-primary" onclick="verifyOTP()">Verify & Continue →</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-student-login')">← Back</button>
+    <div style="text-align:center;margin-top:1rem;font-size:12px;color:var(--muted)">
+      Demo: OTP is shown in console. In production, integrate SMS API.
+      <br><span id="demoOtp" style="color:var(--accent);font-family:var(--mono);font-size:16px;font-weight:700"></span>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: STUDENT DASHBOARD -->
+<div class="page" id="page-student-dash">
+  <div style="width:100%;max-width:560px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <div>
+        <div style="font-size:20px;font-weight:700" id="dashStudentName">Student Name</div>
+        <div style="font-size:13px;color:var(--muted)">Matrix — Class 12 Maths</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="gotoPage('page-role')">Logout</button>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-card">
+        <div class="stat-val" id="dsCompleted">0</div>
+        <div class="stat-label">Submitted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="dsScored">0</div>
+        <div class="stat-label">Scored</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="dsAvg" style="color:var(--accent)">—</div>
+        <div class="stat-label">Average %</div>
+      </div>
+    </div>
+
+    <div id="worksheetCards"></div>
+
+    <button class="btn btn-primary" onclick="gotoPage('page-upload')" style="margin-top:1rem">📤 Submit a Worksheet</button>
+  </div>
+</div>
+
+<!-- PAGE 5: UPLOAD WORKSHEET -->
+<div class="page" id="page-upload">
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">📤</div>
+      <div><div class="logo-text">Submit Worksheet</div><div class="logo-sub" id="uploadStudentName2"></div></div>
+    </div>
+    <h2>Upload your work</h2>
+
+    <div class="form-group">
+      <label>Select worksheet</label>
+      <select id="wsSelect">
+        <option value="">— Choose worksheet —</option>
+        <option value="0">Worksheet 1 (Max 10)</option>
+        <option value="1">Worksheet 2 (Max 10)</option>
+        <option value="2">Worksheet 3 (Max 10)</option>
+        <option value="3">Worksheet 4 (Max 10)</option>
+        <option value="4">Worksheet 5 (Max 10)</option>
+        <option value="5">Final Test (Max 25)</option>
+      </select>
+    </div>
+
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">📷</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px">Click to upload photo</div>
+      <div class="upload-text">Take a clear photo of your completed worksheet</div>
+      <img id="uploadPreview" class="upload-preview" alt="Preview">
+    </div>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" onchange="previewFile(this)">
+
+    <div id="uploadAlert"></div>
+    <button class="btn btn-primary" onclick="submitWorksheet()">Submit for AI Checking 🤖</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-student-dash')">← Back</button>
+  </div>
+</div>
+
+<!-- PAGE 6: AI CHECKING -->
+<div class="page" id="page-checking">
+  <div class="card" style="text-align:center">
+    <div class="ai-checking">
+      <div class="spinner" style="width:50px;height:50px;border-width:3px;margin:0 auto 1.5rem"></div>
+      <h2>AI is checking your worksheet</h2>
+      <p style="color:var(--muted);font-size:14px;margin-top:8px" id="checkingMsg">Analysing your answers...</p>
+      <div class="prog-bar" style="margin-top:1.5rem">
+        <div class="prog-fill" id="checkProg" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 7: RESULT -->
+<div class="page" id="page-result">
+  <div class="card" style="text-align:center">
+    <div style="font-size:60px;margin-bottom:1rem" id="resultEmoji">🎉</div>
+    <h1 id="resultScore" style="font-size:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">—</h1>
+    <p style="color:var(--muted);margin-bottom:1.5rem" id="resultLabel">Your score</p>
+    <div class="card" style="text-align:left;margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">AI FEEDBACK</div>
+      <div id="aiFeedback" style="font-size:14px;line-height:1.7;color:var(--text)"></div>
+    </div>
+    <button class="btn btn-primary" onclick="gotoPage('page-student-dash')">Back to Dashboard</button>
+  </div>
+</div>
+
+<!-- PAGE 8: TEACHER LOGIN -->
+<div class="page" id="page-teacher-login">
+  <div class="card">
+    <div class="logo">
+      <div class="logo-icon">🔐</div>
+      <div><div class="logo-text">Teacher Access</div><div class="logo-sub">Secure Dashboard</div></div>
+    </div>
+    <h2>Enter password</h2>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="teacherPwd" placeholder="Enter your password" onkeydown="if(event.key==='Enter')teacherLogin()">
+    </div>
+    <div id="teacherAlert"></div>
+    <button class="btn btn-primary" onclick="teacherLogin()">Access Dashboard →</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-role')">← Back</button>
+  </div>
+</div>
+
+<!-- PAGE 9: TEACHER DASHBOARD -->
+<div class="page" id="page-teacher-dash" style="align-items:flex-start;padding:1.5rem">
+  <div class="dash-full">
+    <div class="dash-header">
+      <div>
+        <h1 style="font-size:22px;margin-bottom:4px">Teacher Dashboard</h1>
+        <div style="font-size:13px;color:var(--muted)">Matrix Topic — Class 12 Maths</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📊 Export CSV</button>
+        <button class="btn btn-secondary btn-sm" onclick="openStudentMgr()">👥 Manage Students</button>
+        <button class="btn btn-secondary btn-sm" onclick="gotoPage('page-role')">Logout</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="tTotal">0</div><div class="stat-label">Total Students</div></div>
+      <div class="stat-card"><div class="stat-val" id="tSubmissions">0</div><div class="stat-label">Total Submissions</div></div>
+      <div class="stat-card"><div class="stat-val" id="tPending">0</div><div class="stat-label">Pending Review</div></div>
+      <div class="stat-card"><div class="stat-val" id="tAvg" style="color:var(--accent)">—%</div><div class="stat-label">Class Average</div></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchDashTab('submissions')">📥 Submissions</button>
+      <button class="tab-btn" onclick="switchDashTab('marks-table')">📊 Marks Table</button>
+      <button class="tab-btn" onclick="switchDashTab('analysis')">📈 Analysis</button>
+    </div>
+
+    <!-- Submissions Tab -->
+    <div class="tab-content active" id="dtab-submissions">
+      <div id="submissionsList"></div>
+    </div>
+
+    <!-- Marks Table Tab -->
+    <div class="tab-content" id="dtab-marks-table">
+      <div class="tbl-wrap">
+        <table id="marksTable">
+          <thead></thead><tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Analysis Tab -->
+    <div class="tab-content" id="dtab-analysis">
+      <div id="analysisContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Student Manager Modal -->
+<div id="studentMgrModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:center;justify-content:center">
+  <div class="card" style="max-width:500px;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <h2 style="margin:0">Manage Students</h2>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('studentMgrModal').style.display='none'">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Paste student names (one per line)</label>
+      <textarea id="studentListInput" rows="10" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;font-size:13px;width:100%;font-family:var(--font)"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Registered phones (format: Name:phone, one per line)</label>
+      <textarea id="phoneListInput" rows="10" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;font-size:13px;width:100%;font-family:var(--font)" placeholder="Aarav Singh:9876543210&#10;Priya Sharma:9123456789"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveStudents()">Save Students</button>
+  </div>
+</div>
+
+<script>
+// ============ STATE ============
+var APP = {
+  students: [],
+  phones: {},
+  records: {},
+  worksheets: [
+    {name:'Worksheet 1',max:10},
+    {name:'Worksheet 2',max:10},
+    {name:'Worksheet 3',max:10},
+    {name:'Worksheet 4',max:10},
+    {name:'Worksheet 5',max:10},
+    {name:'Final Test',max:25}
+  ],
+  currentStudent: null,
+  currentOTP: null,
+  selectedFile: null,
+  selectedFileB64: null
+};
+
+const TEACHER_PWD = '9897060640';
+
+// Load from storage
+function loadState(){
+  try{
+    var d = localStorage.getItem('matrixApp_v2');
+    if(d){
+      var s = JSON.parse(d);
+      APP.students = s.students||[];
+      APP.phones = s.phones||{};
+      APP.records = s.records||{};
+    }
+  }catch(e){}
+}
+
+function saveState(){
+  try{
+    localStorage.setItem('matrixApp_v2', JSON.stringify({
+      students: APP.students,
+      phones: APP.phones,
+      records: APP.records
+    }));
+  }catch(e){}
+}
+
+loadState();
+populateStudentDropdown();
+
+// ============ NAVIGATION ============
+function gotoPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='page-teacher-dash') renderTeacherDash();
+  if(id==='page-student-dash') renderStudentDash();
+}
+
+// ============ STUDENT LOGIN ============
+function populateStudentDropdown(){
+  var sel = document.getElementById('studentSelect');
+  sel.innerHTML = '<option value="">— Choose your name —</option>';
+  APP.students.forEach(function(s){
+    var opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+function sendOTP(){
+  var name = document.getElementById('studentSelect').value;
+  var phone = document.getElementById('studentPhone').value.trim();
+  var alert_el = document.getElementById('loginAlert');
+
+  if(!name){alert_el.innerHTML='<div class="alert alert-error">⚠ Please select your name</div>';return;}
+  if(!phone || phone.length < 10){alert_el.innerHTML='<div class="alert alert-error">⚠ Please enter a valid 10-digit mobile number</div>';return;}
+
+  // Check if phone matches registered phone
+  var registered = APP.phones[name];
+  if(registered && registered !== phone){
+    alert_el.innerHTML='<div class="alert alert-error">⚠ This phone number is not registered for ' + name + '</div>';
+    return;
+  }
+
+  // Generate OTP
+  var otp = Math.floor(100000 + Math.random()*900000).toString();
+  APP.currentOTP = otp;
+  APP.currentStudent = name;
+
+  // Save phone if not registered
+  if(!APP.phones[name]){APP.phones[name]=phone;saveState();}
+
+  alert_el.innerHTML='';
+  document.getElementById('otpSentMsg').textContent = 'OTP sent to +91-' + phone.slice(-4).padStart(phone.length,'•');
+  document.getElementById('demoOtp').textContent = 'Demo OTP: ' + otp;
+  console.log('OTP for', name, ':', otp);
+
+  // Clear OTP inputs
+  document.querySelectorAll('.otp-inp').forEach(i=>i.value='');
+  gotoPage('page-otp');
+  setTimeout(()=>document.querySelectorAll('.otp-inp')[0].focus(),300);
+}
+
+function otpInput(el, idx){
+  var v = el.value.toString().slice(-1);
+  el.value = v;
+  if(v && idx < 5) document.querySelectorAll('.otp-inp')[idx+1].focus();
+  if(!v && idx > 0) document.querySelectorAll('.otp-inp')[idx-1].focus();
+}
+
+function verifyOTP(){
+  var entered = Array.from(document.querySelectorAll('.otp-inp')).map(i=>i.value).join('');
+  var alertEl = document.getElementById('otpAlert');
+  if(entered.length < 6){alertEl.innerHTML='<div class="alert alert-error">⚠ Enter all 6 digits</div>';return;}
+  if(entered === APP.currentOTP){
+    alertEl.innerHTML='<div class="alert alert-success">✓ Verified!</div>';
+    document.getElementById('dashStudentName').textContent = APP.currentStudent;
+    document.getElementById('uploadStudentName2').textContent = APP.currentStudent;
+    setTimeout(()=>gotoPage('page-student-dash'),600);
+  } else {
+    alertEl.innerHTML='<div class="alert alert-error">⚠ Wrong OTP. Please try again.</div>';
+  }
+}
+
+// ============ STUDENT DASHBOARD ============
+function renderStudentDash(){
+  var s = APP.currentStudent;
+  if(!s) return;
+  var rec = APP.records[s]||{};
+  var submitted=0, scored=0, totalPct=0, pctCount=0;
+
+  var html = '';
+  APP.worksheets.forEach(function(ws,i){
+    var r = rec[i]||{};
+    var status = r.marks!=null?'scored':r.submitted?'submitted':'pending';
+    var badgeClass = status==='scored'?'badge-scored':status==='submitted'?'badge-submitted':'badge-pending';
+    var badgeText = status==='scored'?r.marks+'/'+ws.max:status==='submitted'?'Submitted':'Pending';
+    if(r.submitted) submitted++;
+    if(r.marks!=null){scored++;var pct=Math.round(r.marks/ws.max*100);totalPct+=pct;pctCount++;}
+
+    html += '<div class="sub-card" style="display:flex;justify-content:space-between;align-items:center">';
+    html += '<div><div style="font-weight:600;font-size:14px">'+ws.name+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Max: '+ws.max+' marks</div>';
+    if(r.feedback) html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">"'+r.feedback.slice(0,80)+'..."</div>';
+    html += '</div>';
+    html += '<div style="text-align:right"><span class="badge '+badgeClass+'">'+badgeText+'</span>';
+    if(r.marks!=null){var pct=Math.round(r.marks/ws.max*100);html+='<div style="font-size:11px;color:var(--muted);margin-top:4px">'+pct+'%</div>';}
+    html += '</div></div>';
+  });
+
+  document.getElementById('worksheetCards').innerHTML = html;
+  document.getElementById('dsCompleted').textContent = submitted;
+  document.getElementById('dsScored').textContent = scored;
+  document.getElementById('dsAvg').textContent = pctCount>0?Math.round(totalPct/pctCount)+'%':'—';
+}
+
+// ============ UPLOAD ============
+function previewFile(input){
+  var file = input.files[0];
+  if(!file) return;
+  APP.selectedFile = file;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    APP.selectedFileB64 = e.target.result;
+    var prev = document.getElementById('uploadPreview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    document.getElementById('uploadArea').classList.add('has-file');
+    document.querySelector('#uploadArea .upload-text').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function submitWorksheet(){
+  var wsIdx = document.getElementById('wsSelect').value;
+  var alertEl = document.getElementById('uploadAlert');
+  if(wsIdx===''){alertEl.innerHTML='<div class="alert alert-error">⚠ Please select a worksheet</div>';return;}
+  if(!APP.selectedFileB64){alertEl.innerHTML='<div class="alert alert-error">⚠ Please upload a photo of your worksheet</div>';return;}
+
+  var ws = APP.worksheets[parseInt(wsIdx)];
+  gotoPage('page-checking');
+  runAICheck(parseInt(wsIdx), ws, APP.selectedFileB64);
+}
+
+// ============ AI CHECKING ============
+async function runAICheck(wsIdx, ws, imageB64){
+  var msgs = ['Analysing your worksheet...','Checking each answer...','Calculating marks...','Generating feedback...'];
+  var prog = document.getElementById('checkProg');
+  var msg = document.getElementById('checkingMsg');
+  var step = 0;
+  var interval = setInterval(function(){
+    if(step < msgs.length){msg.textContent=msgs[step];prog.style.width=(25*(step+1))+'%';step++;}
+  },1500);
+
+  try{
+    // Extract base64 data
+    var b64data = imageB64.split(',')[1];
+    var mediaType = imageB64.split(';')[0].split(':')[1];
+
+    var response = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:[
+            {
+              type:'image',
+              source:{type:'base64',media_type:mediaType,data:b64data}
+            },
+            {
+              type:'text',
+              text:`You are a Class 12 CBSE Maths teacher checking a student's ${ws.name} worksheet on the topic of MATRICES.
+
+The maximum marks for this worksheet is ${ws.max}.
+
+Please:
+1. Carefully examine the student's handwritten work in the image
+2. Check each solution for correctness — method, steps, and final answer
+3. Award marks fairly based on CBSE marking scheme (give step marks)
+4. Provide brief, encouraging feedback
+
+Respond ONLY in this exact JSON format (no other text):
+{
+  "marks": <number between 0 and ${ws.max}>,
+  "percentage": <marks/max * 100, rounded>,
+  "feedback": "<2-3 sentences: what was done well, what to improve>",
+  "correct": <number of correct questions>,
+  "total_questions": <total questions visible>,
+  "errors": "<brief note on main mistakes if any, or 'No major errors'>"
+}`
+            }
+          ]
+        }]
+      })
+    });
+
+    clearInterval(interval);
+    prog.style.width='100%';
+
+    var data = await response.json();
+    var text = data.content[0].text;
+    var clean = text.replace(/```json|```/g,'').trim();
+    var result = JSON.parse(clean);
+
+    // Save result
+    if(!APP.records[APP.currentStudent]) APP.records[APP.currentStudent]={};
+    APP.records[APP.currentStudent][wsIdx]={
+      submitted:true,
+      marks:result.marks,
+      maxMarks:ws.max,
+      feedback:result.feedback,
+      errors:result.errors,
+      imageB64:imageB64,
+      timestamp:new Date().toISOString(),
+      aiChecked:true
+    };
+    saveState();
+
+    // Show result
+    var pct = result.percentage;
+    document.getElementById('resultScore').textContent = result.marks+'/'+ws.max;
+    document.getElementById('resultLabel').textContent = ws.name+' — '+pct+'%';
+    document.getElementById('resultEmoji').textContent = pct>=80?'🎉':pct>=50?'👍':'💪';
+    document.getElementById('aiFeedback').innerHTML =
+      '<p style="margin-bottom:10px">'+result.feedback+'</p>'+
+      '<div style="font-size:12px;color:var(--muted)">Correct: '+result.correct+'/'+result.total_questions+' questions</div>'+
+      (result.errors!=='No major errors'?'<div style="font-size:12px;color:var(--amber);margin-top:6px">⚠ '+result.errors+'</div>':'<div style="font-size:12px;color:var(--green);margin-top:6px">✓ '+result.errors+'</div>');
+
+    setTimeout(()=>gotoPage('page-result'),400);
+
+  }catch(err){
+    clearInterval(interval);
+    console.error(err);
+    // Fallback — save as pending
+    if(!APP.records[APP.currentStudent]) APP.records[APP.currentStudent]={};
+    APP.records[APP.currentStudent][wsIdx]={
+      submitted:true,
+      marks:null,
+      maxMarks:ws.max,
+      imageB64:imageB64,
+      timestamp:new Date().toISOString(),
+      aiChecked:false,
+      pending:true
+    };
+    saveState();
+    document.getElementById('resultScore').textContent='Submitted';
+    document.getElementById('resultLabel').textContent='Your teacher will check and add marks';
+    document.getElementById('resultEmoji').textContent='📋';
+    document.getElementById('aiFeedback').innerHTML='<p style="color:var(--amber)">AI checking could not complete. Your worksheet has been saved and your teacher will review it manually.</p>';
+    setTimeout(()=>gotoPage('page-result'),400);
+  }
+}
+
+// ============ TEACHER LOGIN ============
+function teacherLogin(){
+  var pwd = document.getElementById('teacherPwd').value;
+  var alertEl = document.getElementById('teacherAlert');
+  if(pwd === TEACHER_PWD){
+    alertEl.innerHTML='<div class="alert alert-success">✓ Access granted</div>';
+    setTimeout(()=>gotoPage('page-teacher-dash'),500);
+  } else {
+    alertEl.innerHTML='<div class="alert alert-error">⚠ Wrong password</div>';
+  }
+}
+
+// ============ TEACHER DASHBOARD ============
+function renderTeacherDash(){
+  var totalSubs=0, pending=0, totalPct=0, pctCount=0;
+  APP.students.forEach(function(s){
+    var rec = APP.records[s]||{};
+    APP.worksheets.forEach(function(ws,i){
+      var r = rec[i];
+      if(r&&r.submitted){
+        totalSubs++;
+        if(r.marks==null) pending++;
+        else {totalPct+=Math.round(r.marks/ws.max*100);pctCount++;}
+      }
+    });
+  });
+  document.getElementById('tTotal').textContent = APP.students.length;
+  document.getElementById('tSubmissions').textContent = totalSubs;
+  document.getElementById('tPending').textContent = pending;
+  document.getElementById('tAvg').textContent = pctCount>0?Math.round(totalPct/pctCount)+'%':'—';
+  renderSubmissions();
+  renderMarksTable();
+  renderAnalysis();
+}
+
+function renderSubmissions(){
+  var html='';
+  var found=false;
+  APP.students.forEach(function(s){
+    var rec = APP.records[s]||{};
+    APP.worksheets.forEach(function(ws,i){
+      var r = rec[i];
+      if(r&&r.submitted){
+        found=true;
+        var ts = r.timestamp?new Date(r.timestamp).toLocaleDateString('en-IN'):'—';
+        html+='<div class="sub-card">';
+        html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">';
+        html+='<div><div style="font-weight:600">'+s+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">'+ws.name+' • Submitted '+ts+'</div>';
+        if(r.aiChecked) html+='<div class="ai-badge" style="margin-top:6px"><span>🤖</span> AI checked</div>';
+        if(r.pending) html+='<span class="badge badge-submitted">Pending manual review</span>';
+        html+='</div>';
+        html+='<div style="text-align:right">';
+        if(r.marks!=null) html+='<div style="font-size:20px;font-weight:700;color:var(--green)">'+r.marks+'/'+ws.max+'</div>';
+        else html+='<span class="badge badge-submitted">Not scored</span>';
+        html+='</div></div>';
+        if(r.imageB64) html+='<img src="'+r.imageB64+'" class="sub-img" onclick="openLightbox(this.src)" alt="Worksheet photo">';
+        if(r.feedback) html+='<div style="font-size:13px;color:var(--muted);margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px">💬 '+r.feedback+'</div>';
+        html+='<div class="score-form" style="margin-top:12px">';
+        html+='<input type="number" min="0" max="'+ws.max+'" id="mscore_'+s.replace(/\s/g,'_')+'_'+i+'" placeholder="Marks" value="'+(r.marks!=null?r.marks:'')+'" style="width:90px;font-family:var(--mono);font-weight:700">';
+        html+='<span style="font-size:13px;color:var(--muted)">/ '+ws.max+'</span>';
+        html+='<button class="btn btn-green btn-sm" onclick="saveManualScore(\''+s+'\','+i+','+ws.max+')">💾 Save score</button>';
+        html+='</div></div>';
+      }
+    });
+  });
+  if(!found) html='<div class="alert alert-info">📭 No submissions yet. Students will appear here after they submit worksheets.</div>';
+  document.getElementById('submissionsList').innerHTML=html;
+}
+
+function saveManualScore(student,wsIdx,maxMarks){
+  var key='mscore_'+student.replace(/\s/g,'_')+'_'+wsIdx;
+  var val=document.getElementById(key).value;
+  if(val==='') return alert('Enter marks first');
+  var m=parseInt(val);
+  if(m<0||m>maxMarks){alert('Marks must be 0 to '+maxMarks);return;}
+  if(!APP.records[student]) APP.records[student]={};
+  if(!APP.records[student][wsIdx]) APP.records[student][wsIdx]={submitted:true};
+  APP.records[student][wsIdx].marks=m;
+  APP.records[student][wsIdx].maxMarks=maxMarks;
+  saveState();
+  renderTeacherDash();
+  alert('Score saved for '+student+' — '+m+'/'+maxMarks);
+}
+
+function renderMarksTable(){
+  var ws=APP.worksheets;
+  var thead='<tr><th>#</th><th>Student</th>';
+  ws.forEach(function(w){thead+='<th>'+w.name+'<br><span style="font-weight:400;font-size:10px">Max '+w.max+'</span></th>';});
+  thead+='<th>Total</th><th>%</th></tr>';
+  var tbody='';
+  APP.students.forEach(function(s,idx){
+    var rec=APP.records[s]||{};
+    var total=0,maxT=0;
+    tbody+='<tr><td style="color:var(--muted)">'+(idx+1)+'</td><td style="font-weight:600">'+s+'</td>';
+    ws.forEach(function(w,i){
+      var r=rec[i];
+      if(r&&r.marks!=null){
+        var pct=Math.round(r.marks/w.max*100);
+        var cls=pct>=80?'score-high':pct>=50?'score-mid':'score-low';
+        tbody+='<td class="score-cell '+cls+'">'+r.marks+'</td>';
+        total+=r.marks;maxT+=w.max;
+      } else if(r&&r.submitted){
+        tbody+='<td><span class="badge badge-submitted">Sub</span></td>';
+        maxT+=w.max;
+      } else {
+        tbody+='<td style="color:var(--muted)">—</td>';
+      }
+    });
+    var ovPct=maxT>0?Math.round(total/maxT*100):null;
+    var cls=ovPct!=null?(ovPct>=80?'score-high':ovPct>=50?'score-mid':'score-low'):'';
+    tbody+='<td class="score-cell '+cls+'">'+(maxT>0?total:'—')+'</td>';
+    tbody+='<td class="score-cell '+cls+'">'+(ovPct!=null?ovPct+'%':'—')+'</td>';
+    tbody+='</tr>';
+  });
+  document.getElementById('marksTable').querySelector('thead').innerHTML=thead;
+  document.getElementById('marksTable').querySelector('tbody').innerHTML=tbody;
+}
+
+function renderAnalysis(){
+  var ws=APP.worksheets;
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">';
+  ws.forEach(function(w,i){
+    var scores=[],total=0,count=0;
+    APP.students.forEach(function(s){
+      var r=(APP.records[s]||{})[i];
+      if(r&&r.marks!=null){scores.push(r.marks);total+=r.marks;count++;}
+    });
+    var avg=count>0?Math.round(total/count*10)/10:null;
+    var pct=avg!=null?Math.round(avg/w.max*100):0;
+    var barColor=pct>=80?'#10b981':pct>=50?'#f59e0b':'#ef4444';
+    html+='<div class="sub-card"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font-weight:600;font-size:13px">'+w.name+'</span><span class="score-cell" style="color:'+(pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)')+'font-size:14px">'+(avg!=null?avg+'/'+w.max:'—')+'</span></div>';
+    html+='<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>';
+    html+='<div style="font-size:11px;color:var(--muted);margin-top:6px">'+count+' submissions • Class avg '+pct+'%</div></div>';
+  });
+  html+='</div>';
+
+  html+='<div style="margin-top:1.5rem;font-weight:600;font-size:14px;margin-bottom:1rem">Student performance overview</div>';
+  var ranked=APP.students.map(function(s){
+    var rec=APP.records[s]||{};
+    var t=0,mx=0;
+    ws.forEach(function(w,i){var r=rec[i];if(r&&r.marks!=null){t+=r.marks;mx+=w.max;}});
+    return {name:s,pct:mx>0?Math.round(t/mx*100):null,total:t,max:mx};
+  }).filter(function(s){return s.pct!=null;}).sort(function(a,b){return b.pct-a.pct;});
+
+  ranked.forEach(function(s,rank){
+    var cls=s.pct>=80?'score-high':s.pct>=50?'score-mid':'score-low';
+    var barColor=s.pct>=80?'#10b981':s.pct>=50?'#f59e0b':'#ef4444';
+    html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">';
+    html+='<span style="color:var(--muted);font-size:12px;min-width:20px">'+(rank+1)+'</span>';
+    html+='<span style="min-width:150px;font-size:13px">'+s.name+'</span>';
+    html+='<div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="width:'+s.pct+'%;height:100%;background:'+barColor+';border-radius:4px"></div></div>';
+    html+='<span class="score-cell '+cls+'" style="min-width:50px;text-align:right">'+s.pct+'%</span>';
+    html+='</div>';
+  });
+  if(ranked.length===0) html+='<div class="alert alert-info">No scored data yet.</div>';
+  document.getElementById('analysisContent').innerHTML=html;
+}
+
+// ============ STUDENT MANAGER ============
+function openStudentMgr(){
+  document.getElementById('studentListInput').value=APP.students.join('\n');
+  var phoneLines=Object.entries(APP.phones).map(function(e){return e[0]+':'+e[1];}).join('\n');
+  document.getElementById('phoneListInput').value=phoneLines;
+  document.getElementById('studentMgrModal').style.display='flex';
+}
+
+function saveStudents(){
+  var names=document.getElementById('studentListInput').value.trim().split('\n').map(function(n){return n.trim();}).filter(function(n){return n.length>0;});
+  APP.students=names;
+  var phoneLines=document.getElementById('phoneListInput').value.trim().split('\n');
+  phoneLines.forEach(function(line){
+    var parts=line.split(':');
+    if(parts.length===2){APP.phones[parts[0].trim()]=parts[1].trim();}
+  });
+  saveState();
+  populateStudentDropdown();
+  document.getElementById('studentMgrModal').style.display='none';
+  renderTeacherDash();
+  alert('✓ '+names.length+' students saved!');
+}
+
+// ============ UTILITIES ============
+function switchDashTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('dtab-'+id).classList.add('active');
+}
+
+function openLightbox(src){
+  document.getElementById('lightboxImg').src=src;
+  document.getElementById('lightbox').classList.add('open');
+}
+
+function exportCSV(){
+  var ws=APP.worksheets;
+  var rows=[['Student'].concat(ws.map(function(w){return w.name;})).concat(['Total','%'])];
+  APP.students.forEach(function(s){
+    var rec=APP.records[s]||{};
+    var row=[s];var total=0,max=0;
+    ws.forEach(function(w,i){
+      var r=rec[i];
+      if(r&&r.marks!=null){row.push(r.marks);total+=r.marks;max+=w.max;}
+      else row.push('');
+    });
+    row.push(max>0?total:'');
+    row.push(max>0?Math.round(total/max*100)+'%':'');
+    rows.push(row);
+  });
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var blob=new Blob([csv],{type:'text/csv'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='matrix_marks_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
