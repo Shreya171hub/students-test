@@ -4,909 +4,854 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Matrix Worksheet System — Class 12 Maths</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0f1e;
-  --surface:#111827;
-  --surface2:#1a2332;
-  --border:#1e2d42;
-  --accent:#3b82f6;
-  --accent2:#6366f1;
-  --green:#10b981;
-  --red:#ef4444;
-  --amber:#f59e0b;
-  --text:#f1f5f9;
-  --muted:#64748b;
-  --font:'Sora',sans-serif;
-  --mono:'JetBrains Mono',monospace;
+  --bg:#07101f;--surface:#0f1d2f;--surface2:#172334;--border:#1e3050;
+  --accent:#3b82f6;--accent2:#6366f1;--green:#10b981;--red:#ef4444;
+  --amber:#f59e0b;--text:#eef2ff;--muted:#7c8fa8;
+  --font:'Sora',sans-serif;--serif:'Crimson Pro',Georgia,serif;--mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(59,130,246,0.15),transparent),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(99,102,241,0.1),transparent);pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background:radial-gradient(ellipse 70% 40% at 20% 10%,rgba(59,130,246,0.12),transparent),
+             radial-gradient(ellipse 50% 40% at 85% 90%,rgba(99,102,241,0.1),transparent);
+  pointer-events:none;z-index:0}
 
+/* ── Pages ── */
 .page{display:none;min-height:100vh;position:relative;z-index:1}
 .page.active{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+.page-full{display:none;min-height:100vh;position:relative;z-index:1;padding:1.5rem}
+.page-full.active{display:block}
 
-/* Cards */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:440px;position:relative}
-.card::before{content:'';position:absolute;inset:0;border-radius:16px;padding:1px;background:linear-gradient(135deg,rgba(59,130,246,0.3),transparent,rgba(99,102,241,0.2));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+/* ── Card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:460px;position:relative}
+/* card::before removed — was blocking button clicks */
 
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
-.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.3px}
-.logo-sub{font-size:12px;color:var(--muted);font-weight:400}
+/* ── Logo ── */
+.logo{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+.logo-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.3px;line-height:1.3}
+.logo-sub{font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
 
+/* ── Typography ── */
 h1{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
-h2{font-size:18px;font-weight:600;margin-bottom:1.5rem}
+h2{font-size:18px;font-weight:600;margin-bottom:1.4rem}
 .subtitle{font-size:13px;color:var(--muted);margin-bottom:2rem;line-height:1.6}
 
-/* Form */
+/* ── Forms ── */
 .form-group{margin-bottom:1.2rem}
-label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;display:block;margin-bottom:8px}
-input,select{width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s}
-input:focus,select:focus{border-color:var(--accent)}
+label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.6px;text-transform:uppercase;display:block;margin-bottom:8px}
+input,select,textarea{width:100%;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
 select option{background:var(--surface2)}
 
-/* Buttons */
-.btn{width:100%;padding:13px;border-radius:10px;border:none;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.2px}
+/* ── Buttons ── */
+.btn{width:100%;padding:13px;border-radius:10px;border:none;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.1px}
 .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.btn-primary:hover{opacity:0.9;transform:translateY(-1px)}
-.btn-primary:active{transform:translateY(0)}
+.btn-primary:hover{opacity:0.88;transform:translateY(-1px);box-shadow:0 4px 16px rgba(59,130,246,0.3)}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);margin-top:10px}
 .btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
-.btn-sm{width:auto;padding:8px 16px;font-size:12px;border-radius:8px}
+.btn-sm{width:auto;padding:7px 14px;font-size:12px;border-radius:8px;margin-top:0}
 .btn-green{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
-.btn-red{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
 
-/* OTP */
+/* ── OTP ── */
 .otp-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:1.5rem}
-.otp-grid input{padding:14px 0;text-align:center;font-size:20px;font-weight:700;font-family:var(--mono);border-radius:10px}
+.otp-grid input{padding:14px 0;text-align:center;font-size:22px;font-weight:700;font-family:var(--mono);border-radius:10px}
 
-/* Upload */
-.upload-area{border:2px dashed var(--border);border-radius:12px;padding:2.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1.5rem}
-.upload-area:hover{border-color:var(--accent);background:rgba(59,130,246,0.05)}
-.upload-area.has-file{border-color:var(--green);background:rgba(16,185,129,0.05)}
-.upload-icon{font-size:36px;margin-bottom:10px}
-.upload-text{font-size:14px;color:var(--muted)}
-.upload-preview{max-width:100%;border-radius:8px;margin-top:10px;max-height:200px;object-fit:cover;display:none}
+/* ── Alerts ── */
+.alert{padding:11px 15px;border-radius:10px;font-size:13px;margin-bottom:1rem;line-height:1.5}
+.alert-success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#6ee7b7}
+.alert-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#fca5a5}
+.alert-info{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);color:#93c5fd}
+.alert-warn{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);color:#fcd34d}
 
-/* Status badges */
+/* ── Badges ── */
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.badge-pending{background:rgba(100,116,139,0.2);color:var(--muted)}
+.badge-pending{background:rgba(124,143,168,0.15);color:var(--muted)}
 .badge-submitted{background:rgba(245,158,11,0.15);color:var(--amber)}
 .badge-scored{background:rgba(16,185,129,0.15);color:var(--green)}
-.badge-fail{background:rgba(239,68,68,0.15);color:var(--red)}
 
-/* Teacher dashboard */
-.dash-full{max-width:1000px;width:100%;padding:2rem}
-.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:2rem}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem}
-.stat-val{font-size:28px;font-weight:700;letter-spacing:-1px}
-.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
-.tabs{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface2);padding:4px;border-radius:10px}
-.tab-btn{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:13px;border-radius:8px;cursor:pointer;transition:all 0.2s}
-.tab-btn.active{background:var(--surface);color:var(--text);font-weight:600}
+/* ── Stats ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem}
+.stat-val{font-size:26px;font-weight:700;letter-spacing:-1px}
+.stat-label{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── Upload ── */
+.upload-area{border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all 0.25s;margin-bottom:1.2rem;position:relative}
+.upload-area:hover,.upload-area.dragover{border-color:var(--accent);background:rgba(59,130,246,0.04)}
+.upload-area.has-file{border-color:var(--green);background:rgba(16,185,129,0.04)}
+.upload-preview{max-width:100%;border-radius:8px;margin-top:12px;max-height:200px;object-fit:contain;display:none}
+
+/* ── Progress ── */
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.15);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Teacher dash ── */
+.dash-wrap{max-width:1060px;margin:0 auto}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.tabs{display:flex;gap:3px;background:var(--surface2);padding:4px;border-radius:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{flex:1;min-width:90px;padding:8px 6px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:500;border-radius:7px;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tab-btn.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.3)}
 .tab-content{display:none}.tab-content.active{display:block}
-
-/* Table */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead{background:var(--surface2)}
-th{padding:10px 14px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);white-space:nowrap}
-td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:middle}
-tr:hover td{background:rgba(255,255,255,0.02)}
-.score-cell{font-family:var(--mono);font-weight:600;font-size:14px}
-.score-high{color:var(--green)}
-.score-mid{color:var(--amber)}
-.score-low{color:var(--red)}
-
-/* Submission review */
+th{padding:10px 12px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,0.015)}
+.sc-hi{color:var(--green);font-family:var(--mono);font-weight:700}
+.sc-md{color:var(--amber);font-family:var(--mono);font-weight:700}
+.sc-lo{color:var(--red);font-family:var(--mono);font-weight:700}
 .sub-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
-.sub-img{width:100%;border-radius:8px;margin:10px 0;max-height:300px;object-fit:contain;background:#000;cursor:pointer}
-.sub-img:hover{opacity:0.9}
-.score-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.score-form input{width:80px;text-align:center;font-weight:700;font-size:16px}
-.ai-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(99,102,241,0.2));color:var(--accent);border:1px solid rgba(59,130,246,0.3)}
+.sub-img{width:100%;border-radius:8px;margin:12px 0;max-height:300px;object-fit:contain;background:rgba(0,0,0,0.4);cursor:zoom-in;transition:opacity 0.2s}
+.sub-img:hover{opacity:0.88}
+.ai-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(99,102,241,0.15);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3)}
 
-/* Alerts */
-.alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
-.alert-success{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green)}
-.alert-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:var(--red)}
-.alert-info{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--accent)}
+/* ────────────────────────────────────────
+   CBSE WORKSHEET VIEWER
+─────────────────────────────────────── */
+.ws-wrap{max-width:760px;margin:0 auto}
+.ws-paper{background:#fff;color:#111;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.5)}
 
-/* Progress bar */
-.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
-.prog-fill{height:100%;border-radius:3px;transition:width 0.5s}
+/* Header band */
+.ws-header{background:#1a3766;color:#fff;padding:0}
+.ws-header-top{display:flex;align-items:center;gap:14px;padding:14px 24px 10px;border-bottom:1px solid rgba(255,255,255,0.15)}
+.ws-school-logo{width:52px;height:52px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.ws-school-info{flex:1}
+.ws-school-name{font-size:15px;font-weight:700;letter-spacing:0.3px}
+.ws-school-sub{font-size:11px;color:#93c5fd;margin-top:2px}
+.ws-header-bottom{padding:8px 24px 12px;display:flex;gap:24px;flex-wrap:wrap}
+.ws-meta-item{font-size:12px;color:#bfdbfe}
+.ws-meta-item b{color:#fff;font-weight:600}
 
-/* Loading spinner */
-.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.2);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* Title strip */
+.ws-title-strip{background:#e8f0fe;border-bottom:2px solid #1a3766;padding:8px 24px;text-align:center}
+.ws-title-main{font-size:15px;font-weight:700;color:#1a3766;letter-spacing:0.3px}
+.ws-title-sub{font-size:12px;color:#374151;margin-top:2px}
 
-.ai-checking{text-align:center;padding:2rem}
-.ai-checking .spinner{width:40px;height:40px;border-width:3px;margin-bottom:1rem}
+/* Instructions */
+.ws-instructions{background:#fffbeb;border-bottom:1px solid #fde68a;padding:8px 24px;font-size:12px;color:#92400e;line-height:1.6}
+.ws-instructions b{color:#78350f}
 
-/* Image lightbox */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:1000;align-items:center;justify-content:center;cursor:zoom-out}
+/* Body */
+.ws-body{padding:16px 24px 20px;font-family:var(--serif)}
+
+/* Section heading */
+.ws-sec-head{margin:16px 0 10px}
+.ws-sec-title{font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;background:#1a3766;color:#fff;display:inline-block;padding:3px 12px;border-radius:2px}
+.ws-sec-inst{font-size:11.5px;color:#374151;margin-top:5px;font-style:italic;font-family:var(--font)}
+
+/* Question rows */
+.ws-q-row{display:grid;grid-template-columns:32px 1fr 52px;gap:4px;margin-bottom:9px;align-items:baseline;font-size:13.5px;line-height:1.75;color:#1f2937}
+.ws-q-num{font-weight:700;color:#1a3766;font-family:var(--font);font-size:12px;padding-top:1px}
+.ws-q-body{color:#1f2937}
+.ws-q-body sub{font-size:10px}
+.ws-q-marks{text-align:right;font-size:11px;color:#6b7280;font-family:var(--font);white-space:nowrap}
+
+/* Options style for MCQ */
+.ws-options{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:3px;font-size:12.5px;color:#374151;padding-left:4px}
+
+/* Case study box */
+.ws-case-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:10px 14px;font-size:13px;line-height:1.7;color:#0c4a6e;margin-bottom:8px}
+
+/* Footer */
+.ws-footer{border-top:1px solid #d1d5db;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#9ca3af;font-family:var(--font)}
+
+/* Toolbar above worksheet */
+.ws-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+
+/* Lightbox */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:1000;align-items:center;justify-content:center;cursor:zoom-out}
 .lightbox.open{display:flex}
-.lightbox img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain}
+.lightbox img{max-width:92vw;max-height:92vh;object-fit:contain;border-radius:6px}
 
-.divider{height:1px;background:var(--border);margin:1.5rem 0}
-.chip{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;background:rgba(59,130,246,0.15);color:var(--accent);border:1px solid rgba(59,130,246,0.2);margin:2px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.8rem;width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+
+/* Print */
+@media print{
+  body,html{background:#fff!important;color:#000}
+  .ws-paper{box-shadow:none;border-radius:0}
+  .ws-toolbar,.btn,.page:not(#page-ws-view){display:none!important}
+  #page-ws-view{display:block!important;padding:0;min-height:auto}
+  .ws-body{font-size:12.5px}
+  .ws-q-row{font-size:12.5px}
+}
 
 @media(max-width:600px){
-  .card{padding:1.5rem}
-  .otp-grid{gap:6px}
-  .otp-grid input{padding:12px 0;font-size:16px}
+  .card{padding:1.4rem}
+  .ws-header-top{padding:10px 14px 8px}
+  .ws-body,.ws-instructions,.ws-title-strip,.ws-footer{padding-left:14px;padding-right:14px}
+  .ws-q-row{grid-template-columns:28px 1fr 44px;font-size:12.5px}
+  .ws-options{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lightbox" onclick="document.getElementById('lightbox').classList.remove('open')">
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
   <img id="lightboxImg" src="" alt="Worksheet">
 </div>
 
-<!-- PAGE 1: SELECT ROLE -->
+<div class="modal-overlay" id="studentMgrModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+      <h2 style="margin:0;font-size:16px">Manage Students</h2>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('studentMgrModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="form-group"><label>Student Names (one per line)</label><textarea id="studentListInput" rows="12"></textarea></div>
+    <div class="form-group"><label>Registered Phones — Name:10digitnumber</label><textarea id="phoneListInput" rows="5" placeholder="ADITYA SRIVASTAVA:9876543210"></textarea></div>
+    <button class="btn btn-primary" onclick="saveStudents()">Save Students</button>
+  </div>
+</div>
+
+<!-- ═══ PAGE: ROLE ═══ -->
 <div class="page active" id="page-role">
   <div class="card" style="text-align:center">
     <div class="logo" style="justify-content:center;margin-bottom:1.5rem">
       <div class="logo-icon">📐</div>
-      <div><div class="logo-text">Matrix Worksheet System</div><div class="logo-sub">Class 12 Maths — CBSE</div></div>
+      <div><div class="logo-text">Matrix Worksheet System</div><div class="logo-sub">Class 12 Mathematics — CBSE | Nitin Kumar Sir</div></div>
     </div>
     <h1 style="margin-bottom:8px">Welcome</h1>
-    <p class="subtitle">Select your role to continue</p>
-    <button class="btn btn-primary" onclick="gotoPage('page-student-login')" style="margin-bottom:12px">🎓 I am a Student / Parent</button>
-    <button class="btn btn-secondary" onclick="gotoPage('page-teacher-login')">🔐 I am the Teacher</button>
-    <div style="margin-top:1.5rem;font-size:12px;color:var(--muted)">Nitin Kumar Sir • CBSE Class 12 Maths • Sambhal, UP</div>
+    <p class="subtitle">Sambhal, Uttar Pradesh &nbsp;•&nbsp; CBSE Board</p>
+    <button class="btn btn-primary" style="margin-bottom:12px" onclick="gotoPage('page-login')">🎓 Student / Parent Login</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-teacher-login')">🔐 Teacher Login</button>
   </div>
 </div>
 
-<!-- PAGE 2: STUDENT LOGIN -->
-<div class="page" id="page-student-login">
+<!-- ═══ PAGE: STUDENT LOGIN ═══ -->
+<div class="page" id="page-login">
   <div class="card">
-    <div class="logo">
-      <div class="logo-icon">🎓</div>
-      <div><div class="logo-text">Student Login</div><div class="logo-sub">Matrix — Class 12</div></div>
-    </div>
+    <div class="logo"><div class="logo-icon">🎓</div><div><div class="logo-text">Student Login</div><div class="logo-sub">Matrices — Class 12 CBSE</div></div></div>
     <h2>Select your name</h2>
-    <div class="form-group">
-      <label>Your name</label>
-      <select id="studentSelect">
-        <option value="">— Choose your name —</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Your mobile number (for OTP)</label>
-      <input type="tel" id="studentPhone" placeholder="Enter 10-digit mobile number" maxlength="10">
-    </div>
+    <div class="form-group"><label>Your Name</label><select id="studentSelect"><option value="">— Choose your name —</option></select></div>
+    <div class="form-group"><label>Your Mobile Number</label><input type="tel" id="studentPhone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric"></div>
     <div id="loginAlert"></div>
-    <button class="btn btn-primary" onclick="sendOTP()">Send OTP →</button>
+    <button class="btn btn-primary" onclick="sendOTP()">Get OTP →</button>
     <button class="btn btn-secondary" onclick="gotoPage('page-role')">← Back</button>
   </div>
 </div>
 
-<!-- PAGE 3: OTP VERIFY -->
+<!-- ═══ PAGE: OTP ═══ -->
 <div class="page" id="page-otp">
   <div class="card">
-    <div class="logo">
-      <div class="logo-icon">🔒</div>
-      <div><div class="logo-text">Verify OTP</div><div class="logo-sub">Check your SMS</div></div>
-    </div>
-    <h2>Enter 6-digit OTP</h2>
-    <p class="subtitle" id="otpSentMsg">OTP sent to your number</p>
-    <div class="otp-grid" id="otpGrid">
-      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,0)">
-      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,1)">
-      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,2)">
-      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,3)">
-      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,4)">
-      <input type="number" maxlength="1" class="otp-inp" oninput="otpInput(this,5)">
+    <div class="logo"><div class="logo-icon">🔒</div><div><div class="logo-text">Verify OTP</div><div class="logo-sub">Enter the 6-digit code</div></div></div>
+    <h2>Enter OTP</h2>
+    <p class="subtitle" id="otpSentMsg">OTP sent to your mobile</p>
+    <div class="otp-grid">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpMove(this,0)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpMove(this,1)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpMove(this,2)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpMove(this,3)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpMove(this,4)">
+      <input type="number" maxlength="1" class="otp-inp" oninput="otpMove(this,5)">
     </div>
     <div id="otpAlert"></div>
-    <button class="btn btn-primary" onclick="verifyOTP()">Verify & Continue →</button>
-    <button class="btn btn-secondary" onclick="gotoPage('page-student-login')">← Back</button>
-    <div style="text-align:center;margin-top:1rem;font-size:12px;color:var(--muted)">
-      Demo: OTP is shown in console. In production, integrate SMS API.
-      <br><span id="demoOtp" style="color:var(--accent);font-family:var(--mono);font-size:16px;font-weight:700"></span>
+    <button class="btn btn-primary" onclick="verifyOTP()">Verify →</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-login')">← Back</button>
+    <div style="text-align:center;margin-top:1.2rem">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Your OTP (demo):</div>
+      <div id="demoOtp" style="color:var(--accent);font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:6px"></div>
     </div>
   </div>
 </div>
 
-<!-- PAGE 4: STUDENT DASHBOARD -->
-<div class="page" id="page-student-dash">
-  <div style="width:100%;max-width:560px">
+<!-- ═══ PAGE: STUDENT DASHBOARD ═══ -->
+<div class="page" id="page-dash" style="justify-content:flex-start;padding-top:2rem">
+  <div style="width:100%;max-width:600px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
       <div>
-        <div style="font-size:20px;font-weight:700" id="dashStudentName">Student Name</div>
-        <div style="font-size:13px;color:var(--muted)">Matrix — Class 12 Maths</div>
+        <div style="font-size:20px;font-weight:700" id="dashName"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Matrices — Class 12 CBSE</div>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="gotoPage('page-role')">Logout</button>
     </div>
-
     <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="stat-card">
-        <div class="stat-val" id="dsCompleted">0</div>
-        <div class="stat-label">Submitted</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="dsScored">0</div>
-        <div class="stat-label">Scored</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="dsAvg" style="color:var(--accent)">—</div>
-        <div class="stat-label">Average %</div>
-      </div>
+      <div class="stat-card"><div class="stat-val" id="ds-sub">0</div><div class="stat-label">Submitted</div></div>
+      <div class="stat-card"><div class="stat-val" id="ds-scored">0</div><div class="stat-label">Scored</div></div>
+      <div class="stat-card"><div class="stat-val" id="ds-avg" style="color:var(--accent)">—</div><div class="stat-label">Average %</div></div>
     </div>
-
-    <div id="worksheetCards"></div>
-
-    <button class="btn btn-primary" onclick="gotoPage('page-upload')" style="margin-top:1rem">📤 Submit a Worksheet</button>
+    <div id="wsCardList"></div>
   </div>
 </div>
 
-<!-- PAGE 5: UPLOAD WORKSHEET -->
+<!-- ═══ PAGE: WORKSHEET VIEWER ═══ -->
+<div class="page-full" id="page-ws-view">
+  <div class="ws-wrap">
+    <div class="ws-toolbar">
+      <button class="btn btn-secondary btn-sm" onclick="gotoPage('page-dash')">← Dashboard</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ Print PDF</button>
+        <button class="btn btn-primary btn-sm" onclick="goUpload()">📤 Submit My Work</button>
+      </div>
+    </div>
+    <div class="ws-paper" id="wsPaper"></div>
+    <div style="text-align:center;padding:1.5rem 0">
+      <button class="btn btn-primary" style="max-width:320px;margin:0 auto" onclick="goUpload()">📤 Solved it — Submit Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: UPLOAD ═══ -->
 <div class="page" id="page-upload">
   <div class="card">
-    <div class="logo">
-      <div class="logo-icon">📤</div>
-      <div><div class="logo-text">Submit Worksheet</div><div class="logo-sub" id="uploadStudentName2"></div></div>
-    </div>
-    <h2>Upload your work</h2>
-
-    <div class="form-group">
-      <label>Select worksheet</label>
-      <select id="wsSelect">
-        <option value="">— Choose worksheet —</option>
-        <option value="0">Worksheet 1 (Max 10)</option>
-        <option value="1">Worksheet 2 (Max 10)</option>
-        <option value="2">Worksheet 3 (Max 10)</option>
-        <option value="3">Worksheet 4 (Max 10)</option>
-        <option value="4">Worksheet 5 (Max 10)</option>
-        <option value="5">Final Test (Max 25)</option>
-      </select>
-    </div>
-
-    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-      <div class="upload-icon">📷</div>
-      <div style="font-size:15px;font-weight:600;margin-bottom:6px">Click to upload photo</div>
-      <div class="upload-text">Take a clear photo of your completed worksheet</div>
+    <div class="logo"><div class="logo-icon">📤</div><div><div class="logo-text" id="uploadWsName">Submit Worksheet</div><div class="logo-sub" id="uploadStudentSub"></div></div></div>
+    <div class="alert alert-info" style="font-size:12px;margin-bottom:1.2rem">📌 Solve the questions on paper → Take a <b>clear, well-lit</b> photo → Upload below</div>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondragover="this.classList.add('dragover');event.preventDefault()" ondragleave="this.classList.remove('dragover')" ondrop="dropFile(event)">
+      <div style="font-size:38px;margin-bottom:8px">📷</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Tap to capture / upload photo</div>
+      <div style="font-size:12px;color:var(--muted)" id="uploadHint">Clear photo of your completed worksheet</div>
       <img id="uploadPreview" class="upload-preview" alt="Preview">
     </div>
     <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" onchange="previewFile(this)">
-
     <div id="uploadAlert"></div>
-    <button class="btn btn-primary" onclick="submitWorksheet()">Submit for AI Checking 🤖</button>
-    <button class="btn btn-secondary" onclick="gotoPage('page-student-dash')">← Back</button>
+    <button class="btn btn-primary" onclick="submitWs()">Submit for AI Checking 🤖</button>
+    <button class="btn btn-secondary" onclick="gotoPage('page-ws-view')">← View Questions Again</button>
   </div>
 </div>
 
-<!-- PAGE 6: AI CHECKING -->
+<!-- ═══ PAGE: CHECKING ═══ -->
 <div class="page" id="page-checking">
-  <div class="card" style="text-align:center">
-    <div class="ai-checking">
-      <div class="spinner" style="width:50px;height:50px;border-width:3px;margin:0 auto 1.5rem"></div>
-      <h2>AI is checking your worksheet</h2>
-      <p style="color:var(--muted);font-size:14px;margin-top:8px" id="checkingMsg">Analysing your answers...</p>
-      <div class="prog-bar" style="margin-top:1.5rem">
-        <div class="prog-fill" id="checkProg" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
-      </div>
+  <div class="card" style="text-align:center;padding:2.5rem 2rem">
+    <div class="spinner" style="width:56px;height:56px;border-width:3px;margin:0 auto 1.5rem"></div>
+    <h2 style="margin-bottom:8px">Checking your worksheet…</h2>
+    <p style="color:var(--muted);font-size:13px" id="checkMsg">Analysing your answers…</p>
+    <div class="prog-bar" style="margin-top:1.5rem;height:8px">
+      <div class="prog-fill" id="checkProg" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
     </div>
   </div>
 </div>
 
-<!-- PAGE 7: RESULT -->
+<!-- ═══ PAGE: RESULT ═══ -->
 <div class="page" id="page-result">
   <div class="card" style="text-align:center">
-    <div style="font-size:60px;margin-bottom:1rem" id="resultEmoji">🎉</div>
-    <h1 id="resultScore" style="font-size:48px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">—</h1>
-    <p style="color:var(--muted);margin-bottom:1.5rem" id="resultLabel">Your score</p>
-    <div class="card" style="text-align:left;margin-bottom:1rem">
-      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">AI FEEDBACK</div>
-      <div id="aiFeedback" style="font-size:14px;line-height:1.7;color:var(--text)"></div>
+    <div style="font-size:64px;margin-bottom:4px" id="resEmoji">🎉</div>
+    <div id="resScore" style="font-size:54px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px">—</div>
+    <div style="color:var(--muted);font-size:13px;margin:4px 0 1.5rem" id="resLabel"></div>
+    <div class="card" style="text-align:left;margin-bottom:1rem;max-width:100%">
+      <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:10px">AI FEEDBACK</div>
+      <div id="resFeedback" style="font-size:13.5px;line-height:1.75"></div>
     </div>
-    <button class="btn btn-primary" onclick="gotoPage('page-student-dash')">Back to Dashboard</button>
+    <button class="btn btn-primary" onclick="gotoPage('page-dash')">Back to Dashboard</button>
   </div>
 </div>
 
-<!-- PAGE 8: TEACHER LOGIN -->
+<!-- ═══ PAGE: TEACHER LOGIN ═══ -->
 <div class="page" id="page-teacher-login">
   <div class="card">
-    <div class="logo">
-      <div class="logo-icon">🔐</div>
-      <div><div class="logo-text">Teacher Access</div><div class="logo-sub">Secure Dashboard</div></div>
-    </div>
-    <h2>Enter password</h2>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="teacherPwd" placeholder="Enter your password" onkeydown="if(event.key==='Enter')teacherLogin()">
-    </div>
+    <div class="logo"><div class="logo-icon">🔐</div><div><div class="logo-text">Teacher Access</div><div class="logo-sub">Secure — Nitin Kumar Sir</div></div></div>
+    <h2>Enter Password</h2>
+    <div class="form-group"><label>Password</label><input type="password" id="teacherPwd" placeholder="••••••••••" onkeydown="if(event.key==='Enter')teacherLogin()"></div>
     <div id="teacherAlert"></div>
     <button class="btn btn-primary" onclick="teacherLogin()">Access Dashboard →</button>
     <button class="btn btn-secondary" onclick="gotoPage('page-role')">← Back</button>
   </div>
 </div>
 
-<!-- PAGE 9: TEACHER DASHBOARD -->
-<div class="page" id="page-teacher-dash" style="align-items:flex-start;padding:1.5rem">
-  <div class="dash-full">
+<!-- ═══ PAGE: TEACHER DASHBOARD ═══ -->
+<div class="page-full" id="page-teacher-dash">
+  <div class="dash-wrap">
     <div class="dash-header">
-      <div>
-        <h1 style="font-size:22px;margin-bottom:4px">Teacher Dashboard</h1>
-        <div style="font-size:13px;color:var(--muted)">Matrix Topic — Class 12 Maths</div>
-      </div>
+      <div><h1 style="font-size:20px;margin:0 0 3px">Teacher Dashboard</h1><div style="font-size:12px;color:var(--muted)">Matrices — Class 12 Maths • Nitin Kumar Sir</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📊 Export CSV</button>
-        <button class="btn btn-secondary btn-sm" onclick="openStudentMgr()">👥 Manage Students</button>
+        <button class="btn btn-secondary btn-sm" onclick="openStudentMgr()">👥 Students</button>
         <button class="btn btn-secondary btn-sm" onclick="gotoPage('page-role')">Logout</button>
       </div>
     </div>
-
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val" id="tTotal">0</div><div class="stat-label">Total Students</div></div>
-      <div class="stat-card"><div class="stat-val" id="tSubmissions">0</div><div class="stat-label">Total Submissions</div></div>
-      <div class="stat-card"><div class="stat-val" id="tPending">0</div><div class="stat-label">Pending Review</div></div>
-      <div class="stat-card"><div class="stat-val" id="tAvg" style="color:var(--accent)">—%</div><div class="stat-label">Class Average</div></div>
+      <div class="stat-card"><div class="stat-val" id="tTotal">0</div><div class="stat-label">Students</div></div>
+      <div class="stat-card"><div class="stat-val" id="tSubs">0</div><div class="stat-label">Submissions</div></div>
+      <div class="stat-card"><div class="stat-val" id="tPending">0</div><div class="stat-label">Pending</div></div>
+      <div class="stat-card"><div class="stat-val" id="tAvg" style="color:var(--accent)">—</div><div class="stat-label">Class Avg</div></div>
     </div>
-
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchDashTab('submissions')">📥 Submissions</button>
-      <button class="tab-btn" onclick="switchDashTab('marks-table')">📊 Marks Table</button>
-      <button class="tab-btn" onclick="switchDashTab('analysis')">📈 Analysis</button>
+      <button class="tab-btn active" onclick="switchTab('submissions',this)">📥 Submissions</button>
+      <button class="tab-btn" onclick="switchTab('marks-table',this)">📊 Marks Table</button>
+      <button class="tab-btn" onclick="switchTab('analysis',this)">📈 Analysis</button>
     </div>
-
-    <!-- Submissions Tab -->
-    <div class="tab-content active" id="dtab-submissions">
-      <div id="submissionsList"></div>
-    </div>
-
-    <!-- Marks Table Tab -->
-    <div class="tab-content" id="dtab-marks-table">
-      <div class="tbl-wrap">
-        <table id="marksTable">
-          <thead></thead><tbody></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Analysis Tab -->
-    <div class="tab-content" id="dtab-analysis">
-      <div id="analysisContent"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Student Manager Modal -->
-<div id="studentMgrModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:center;justify-content:center">
-  <div class="card" style="max-width:500px;max-height:80vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-      <h2 style="margin:0">Manage Students</h2>
-      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('studentMgrModal').style.display='none'">✕</button>
-    </div>
-    <div class="form-group">
-      <label>Paste student names (one per line)</label>
-      <textarea id="studentListInput" rows="10" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;font-size:13px;width:100%;font-family:var(--font)"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Registered phones (format: Name:phone, one per line)</label>
-      <textarea id="phoneListInput" rows="10" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px;font-size:13px;width:100%;font-family:var(--font)" placeholder="Aarav Singh:9876543210&#10;Priya Sharma:9123456789"></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="saveStudents()">Save Students</button>
+    <div class="tab-content active" id="dtab-submissions"><div id="subList"></div></div>
+    <div class="tab-content" id="dtab-marks-table"><div class="tbl-wrap"><table id="marksTable"><thead></thead><tbody></tbody></table></div></div>
+    <div class="tab-content" id="dtab-analysis"><div id="analysisDiv"></div></div>
   </div>
 </div>
 
 <script>
-// ============ STATE ============
-var APP = {
-  students: [],
-  phones: {},
-  records: {},
-  worksheets: [
-    {name:'Worksheet 1',max:10},
-    {name:'Worksheet 2',max:10},
-    {name:'Worksheet 3',max:10},
-    {name:'Worksheet 4',max:10},
-    {name:'Worksheet 5',max:10},
-    {name:'Final Test',max:25}
-  ],
-  currentStudent: null,
-  currentOTP: null,
-  selectedFile: null,
-  selectedFileB64: null
+// ══════════════════════════════════════
+// WORKSHEET DATA
+// ══════════════════════════════════════
+var WORKSHEETS=[{name:"Worksheet 1",max:20,topic:"Order, Types, Construction & Equality of Matrices",time:"45 Minutes",sections:[{title:"SECTION A — Multiple Choice Questions (1 mark each)",instruction:"Choose the correct option.",qs:[{n:"1",marks:1,text:"If A is a matrix of order m×n and B is a matrix of order n×p, then the order of matrix AB is:<br><span class='ws-options'><span>(a) m×p</span><span>(b) n×n</span><span>(c) p×m</span><span>(d) m×n</span></span>"},{n:"2",marks:1,text:"The number of all possible matrices of order 2×3 with each entry 0 or 1 is:<br><span class='ws-options'><span>(a) 16</span><span>(b) 32</span><span>(c) 64</span><span>(d) 6</span></span>"},{n:"3",marks:1,text:"If A=[a<sub>ij</sub>] is a square matrix of order 2 such that a<sub>ij</sub>=1 when i≠j and a<sub>ij</sub>=0 when i=j, then A² is:<br><span class='ws-options'><span>(a) I</span><span>(b) A</span><span>(c) 0</span><span>(d) None of these</span></span>"}]},{title:"SECTION B — Assertion–Reason (1 mark each)",instruction:"(a) Both A and R true, R is correct explanation &nbsp;(b) Both true, R not correct explanation &nbsp;(c) A true, R false &nbsp;(d) A false, R true",qs:[{n:"4",marks:1,text:"<b>Assertion (A):</b> A matrix A=[[1,2,3]] is a row matrix of order 1×3.<br><b>Reason (R):</b> A matrix having only one row is called a row matrix."},{n:"5",marks:1,text:"<b>Assertion (A):</b> The matrix A=[[2,0,0],[0,5,0],[0,0,−3]] is a diagonal matrix.<br><b>Reason (R):</b> A square matrix is diagonal if all off-diagonal elements are zero."}]},{title:"SECTION C — Short Answer (2 marks each)",instruction:"Show all steps clearly.",qs:[{n:"6",marks:2,text:"Construct a 3×3 matrix A=[a<sub>ij</sub>] where a<sub>ij</sub>=(i²+2j)/2. Write the complete matrix."},{n:"7",marks:2,text:"If A=[[2x+1, 3],[4, y−1]] and B=[[x+3, 3],[4, 2]] are equal matrices, find x and y. Hence write matrix A."}]},{title:"SECTION D — Long Answer (3 marks each)",instruction:"Show complete working. Marks awarded for correct steps.",qs:[{n:"8",marks:3,text:"If A=[[0,1],[0,0]], prove that (aI+bA)ⁿ = aⁿI + naⁿ⁻¹bA for every positive integer n, where I is the identity matrix of order 2. Verify for n=3."},{n:"9",marks:3,text:"If A=[[cosθ, −sinθ],[sinθ, cosθ]], show that A·Aᵀ = Aᵀ·A = I. What type of matrix is A? Find A when θ=π/4."}]},{title:"SECTION E — Case Study (4 marks)",instruction:"Read carefully and answer all parts.",qs:[{n:"10",marks:4,text:"<div class='ws-case-box'>A school conducted a survey of students' participation in Sports (S), Music (M), and Art (A). Results for two classes:<br><br><b>Class 11:</b> P = [[45,30,25],[38,42,20]] &nbsp; <b>Class 12:</b> Q = [[40,28,32],[35,38,24]]<br>(Rows = Boys, Girls &nbsp;|&nbsp; Cols = S, M, A)</div>(i) Write the matrix P+Q representing total participation across both classes. <b>[1]</b><br>(ii) Find P−Q and interpret its meaning in this context. <b>[1]</b><br>(iii) If participation fees per activity are ₹50 (S), ₹30 (M), ₹40 (A), represent as column matrix F and find PF. Interpret. <b>[2]</b>"}]}]},{name:"Worksheet 2",max:20,topic:"Matrix Addition, Subtraction & Scalar Multiplication",time:"45 Minutes",sections:[{title:"SECTION A — Multiple Choice Questions (1 mark each)",instruction:"Choose the correct option.",qs:[{n:"1",marks:1,text:"If A and B are matrices of same order, then (A+B)ᵀ equals:<br><span class='ws-options'><span>(a) Aᵀ+Bᵀ</span><span>(b) Aᵀ−Bᵀ</span><span>(c) Aᵀ·Bᵀ</span><span>(d) Bᵀ+A</span></span>"},{n:"2",marks:1,text:"If A=[[1,2],[3,4]] and 2A+B=[[3,5],[8,10]], then B is:<br><span class='ws-options'><span>(a) [[1,1],[2,2]]</span><span>(b) [[1,1],[1,2]]</span><span>(c) [[2,1],[2,2]]</span><span>(d) [[0,1],[2,2]]</span></span>"},{n:"3",marks:1,text:"For any matrix A, (Aᵀ)ᵀ equals:<br><span class='ws-options'><span>(a) A²</span><span>(b) 2A</span><span>(c) A</span><span>(d) |A|</span></span>"}]},{title:"SECTION B — Assertion–Reason (1 mark each)",instruction:"Same options (a)(b)(c)(d) as Section B above.",qs:[{n:"4",marks:1,text:"<b>Assertion (A):</b> If A is 2×3 and B is 3×2, then A+B is not defined.<br><b>Reason (R):</b> Addition of matrices requires both matrices to have the same order."},{n:"5",marks:1,text:"<b>Assertion (A):</b> For any scalar k and matrix A, (kA)ᵀ = k(Aᵀ).<br><b>Reason (R):</b> Scalar multiplication distributes over transpose."}]},{title:"SECTION C — Short Answer (2 marks each)",instruction:"Show all steps clearly.",qs:[{n:"6",marks:2,text:"Find x, y, z and w: &nbsp; 3[[x,y],[z,w]] − [[x,6],[−1,2w]] = [[3,2],[4,7]]"},{n:"7",marks:2,text:"If A=[[2,3],[1,−4]] and B=[[1,−2],[−1,3]], verify that (A−B)ᵀ = Aᵀ−Bᵀ."}]},{title:"SECTION D — Long Answer (3 marks each)",instruction:"Show complete working.",qs:[{n:"8",marks:3,text:"If A=[[1,2],[4,1],[5,6]], B=[[1,2],[6,4],[7,3]] and C=[[−1,2],[3,1],[2,0]], verify A+(B+C)=(A+B)+C. State the law illustrated."},{n:"9",marks:3,text:"Express B=[[2,−2,−4],[−1,3,4],[1,−2,−3]] as sum of a symmetric matrix P and a skew-symmetric matrix Q. Verify P+Q=B."}]},{title:"SECTION E — Case Study (4 marks)",instruction:"Read carefully and answer all parts.",qs:[{n:"10",marks:4,text:"<div class='ws-case-box'>Two factories F₁ and F₂ manufacture products P₁, P₂, P₃. Monthly production (thousands):<br><b>F₁:</b> A=[[9,8,7],[6,5,4]] &nbsp; <b>F₂:</b> B=[[3,4,2],[5,6,8]] &nbsp; (Rows=Week1,Week2)</div>(i) Find total production matrix A+B. <b>[1]</b><br>(ii) In March, F₁ increases production by 10%. Write the new matrix. <b>[1]</b><br>(iii) Profit per thousand units: P₁=₹2L, P₂=₹3L, P₃=₹4L. Represent as matrix and find F₁'s weekly profit. <b>[2]</b>"}]}]},{name:"Worksheet 3",max:20,topic:"Matrix Multiplication & its Properties",time:"45 Minutes",sections:[{title:"SECTION A — Multiple Choice Questions (1 mark each)",instruction:"Choose the correct option.",qs:[{n:"1",marks:1,text:"If A is 3×4 and AB is defined with B having 6 columns, then order of B and AB are:<br><span class='ws-options'><span>(a) 4×6 and 3×6</span><span>(b) 6×4 and 3×6</span><span>(c) 4×6 and 6×6</span><span>(d) 3×6 and 3×4</span></span>"},{n:"2",marks:1,text:"If A=[[1,0],[0,1]] and B=[[0,1],[1,0]], then AB+BA equals:<br><span class='ws-options'><span>(a) 2A</span><span>(b) 2B</span><span>(c) A+B</span><span>(d) 2(A+B)</span></span>"},{n:"3",marks:1,text:"Which of the following is NOT always true for compatible matrices?<br><span class='ws-options'><span>(a) A(BC)=(AB)C</span><span>(b) A(B+C)=AB+AC</span><span>(c) AB=BA</span><span>(d) (AB)ᵀ=BᵀAᵀ</span></span>"}]},{title:"SECTION B — Assertion–Reason (1 mark each)",instruction:"Same options (a)(b)(c)(d) as Section B above.",qs:[{n:"4",marks:1,text:"<b>Assertion (A):</b> Matrix multiplication is commutative, i.e., AB=BA always.<br><b>Reason (R):</b> Matrix multiplication is associative but not necessarily commutative."},{n:"5",marks:1,text:"<b>Assertion (A):</b> If AB=0, then at least one of A or B must be a zero matrix.<br><b>Reason (R):</b> In matrix algebra, the product of two non-zero matrices can be a zero matrix."}]},{title:"SECTION C — Short Answer (2 marks each)",instruction:"Show all steps clearly.",qs:[{n:"6",marks:2,text:"If A=[[0,−1],[1,0]] and B=[[1,2],[3,4]], find AB and BA. Is AB=BA? Comment."},{n:"7",marks:2,text:"If A=[[1,2,3]] and B=[[1],[2],[3]], find both AB and BA. Are they equal? State their orders."}]},{title:"SECTION D — Long Answer (3 marks each)",instruction:"Show complete working.",qs:[{n:"8",marks:3,text:"Given A=[[1,1,1],[1,2,−3],[2,−1,3]], find A²−5A+6I. If the result equals kI, find k."},{n:"9",marks:3,text:"If A=[[1,2],[2,1]] and f(x)=x²−3x−4, find f(A). Determine whether A is a root of f(x)=0."}]},{title:"SECTION E — Case Study (4 marks)",instruction:"Read carefully and answer all parts.",qs:[{n:"10",marks:4,text:"<div class='ws-case-box'>Aman buys 2 kg tea, 3 kg sugar, 1 kg rice. Binay buys 1 kg tea, 2 kg sugar, 3 kg rice. Chintu buys 3 kg tea, 1 kg sugar, 2 kg rice.<br>Cost per kg: Tea=₹80, Sugar=₹30, Rice=₹50.</div>(i) Represent purchases as 3×3 matrix P and costs as 3×1 matrix C. <b>[1]</b><br>(ii) Calculate PC to find each person's total expenditure. <b>[2]</b><br>(iii) A 10% discount is offered. Find saving of each person using matrices. <b>[1]</b>"}]}]},{name:"Worksheet 4",max:20,topic:"Transpose, Symmetric & Skew-Symmetric Matrices",time:"45 Minutes",sections:[{title:"SECTION A — Multiple Choice Questions (1 mark each)",instruction:"Choose the correct option.",qs:[{n:"1",marks:1,text:"If A is a square matrix, then A−Aᵀ is always:<br><span class='ws-options'><span>(a) Symmetric</span><span>(b) Skew-symmetric</span><span>(c) Identity</span><span>(d) Zero matrix</span></span>"},{n:"2",marks:1,text:"If A is a skew-symmetric matrix of order 3, then det(A) is:<br><span class='ws-options'><span>(a) Always positive</span><span>(b) Always negative</span><span>(c) Zero</span><span>(d) Any real number</span></span>"},{n:"3",marks:1,text:"If A and B are symmetric matrices of the same order, then AB−BA is:<br><span class='ws-options'><span>(a) Symmetric</span><span>(b) Skew-symmetric</span><span>(c) Zero matrix</span><span>(d) Identity matrix</span></span>"}]},{title:"SECTION B — Assertion–Reason (1 mark each)",instruction:"Same options (a)(b)(c)(d) as Section B above.",qs:[{n:"4",marks:1,text:"<b>Assertion (A):</b> For any square matrix A, the matrix ½(A+Aᵀ) is always symmetric.<br><b>Reason (R):</b> A matrix P is symmetric if and only if Pᵀ=P."},{n:"5",marks:1,text:"<b>Assertion (A):</b> Every diagonal element of a skew-symmetric matrix is zero.<br><b>Reason (R):</b> In a skew-symmetric matrix, a<sub>ij</sub>=a<sub>ji</sub> for all i,j."}]},{title:"SECTION C — Short Answer (2 marks each)",instruction:"Show all steps clearly.",qs:[{n:"6",marks:2,text:"If A=[[3,5],[−4,2]] and B=[[−1,4],[3,−2]], verify (AB)ᵀ=BᵀAᵀ (Reversal Law). State the law in general form."},{n:"7",marks:2,text:"Find values of x,y,z if A=[[0,2y,z],[x,y,−z],[x,−y,z]] is a skew-symmetric matrix."}]},{title:"SECTION D — Long Answer (3 marks each)",instruction:"Show complete working.",qs:[{n:"8",marks:3,text:"Prove: (i) A+Aᵀ is symmetric (ii) A−Aᵀ is skew-symmetric for any square matrix A. Hence express A=[[1,3,5],[−6,8,3],[−4,6,5]] as sum of symmetric and skew-symmetric matrix."},{n:"9",marks:3,text:"If A=[[1,2],[2,3]] and B=[[1,3],[3,4]], verify: (i) (A+B)ᵀ=Aᵀ+Bᵀ &nbsp; (ii) (2A)ᵀ=2Aᵀ &nbsp; (iii) (AB)ᵀ=BᵀAᵀ"}]},{title:"SECTION E — Case Study (4 marks)",instruction:"Read carefully and answer all parts.",qs:[{n:"10",marks:4,text:"<div class='ws-case-box'>In a communication network, data transfer between 4 nodes is represented by:<br>A=[[0,1,1,0],[1,0,0,1],[1,0,0,1],[0,1,1,0]] &nbsp; where a<sub>ij</sub>=1 means direct connection.</div>(i) Verify A is symmetric. What does symmetry mean in this network? <b>[1]</b><br>(ii) Find A². What does entry (i,j) of A² represent? <b>[2]</b><br>(iii) Find Aᵀ and verify Aᵀ=A. What type of matrix is A+Aᵀ? <b>[1]</b>"}]}]},{name:"Worksheet 5",max:20,topic:"Invertible Matrices & Elementary Row Operations",time:"45 Minutes",sections:[{title:"SECTION A — Multiple Choice Questions (1 mark each)",instruction:"Choose the correct option.",qs:[{n:"1",marks:1,text:"If A is a square matrix such that A²=I, then (A−I)³+(A+I)³−7A equals:<br><span class='ws-options'><span>(a) A</span><span>(b) I−A</span><span>(c) I+A</span><span>(d) 3A</span></span>"},{n:"2",marks:1,text:"If A and B are invertible matrices of same order, then (AB)⁻¹ equals:<br><span class='ws-options'><span>(a) A⁻¹B⁻¹</span><span>(b) B⁻¹A⁻¹</span><span>(c) A⁻¹B</span><span>(d) BA⁻¹</span></span>"},{n:"3",marks:1,text:"The matrix [[1,0],[k,1]] is invertible for:<br><span class='ws-options'><span>(a) k=0 only</span><span>(b) k=1 only</span><span>(c) No value of k</span><span>(d) All real k</span></span>"}]},{title:"SECTION B — Assertion–Reason (1 mark each)",instruction:"Same options (a)(b)(c)(d) as Section B above.",qs:[{n:"4",marks:1,text:"<b>Assertion (A):</b> If A is invertible, then (Aᵀ)⁻¹=(A⁻¹)ᵀ.<br><b>Reason (R):</b> The inverse of transpose equals the transpose of the inverse."},{n:"5",marks:1,text:"<b>Assertion (A):</b> A matrix A is invertible if and only if it is non-singular.<br><b>Reason (R):</b> A square matrix is invertible iff its determinant is non-zero."}]},{title:"SECTION C — Short Answer (2 marks each)",instruction:"Show all steps clearly.",qs:[{n:"6",marks:2,text:"Using elementary row operations, find the inverse of A=[[2,5],[1,3]]. Verify by showing A·A⁻¹=I."},{n:"7",marks:2,text:"If A=[[3,1],[−1,2]] and B=[[2,−1],[1,3]], verify that (AB)⁻¹=B⁻¹A⁻¹."}]},{title:"SECTION D — Long Answer (3 marks each)",instruction:"Show complete working.",qs:[{n:"8",marks:3,text:"Find the inverse of A=[[1,2,3],[2,5,7],[2,4,5]] using elementary row operations. Write all row operations clearly at each step."},{n:"9",marks:3,text:"If A=[[2,3],[1,4]] satisfies A²−6A+kI=0, find k. Hence express A⁻¹ in terms of A and I."}]},{title:"SECTION E — Case Study (4 marks)",instruction:"Read carefully and answer all parts.",qs:[{n:"10",marks:4,text:"<div class='ws-case-box'>A coaching institute solves the system AX=B where:<br>A=[[2,1,1],[1,2,1],[1,1,2]] (enrollment matrix) &nbsp;&nbsp; B=[[14000],[13000],[14000]] (revenue in ₹)</div>(i) Show det(A)≠0, hence A is invertible. <b>[1]</b><br>(ii) Find A⁻¹ using row reduction. <b>[2]</b><br>(iii) Solve X=A⁻¹B to find fee per student for each course. <b>[1]</b>"}]}]},{name:"Final Test",max:30,topic:"Matrices — Complete Chapter (Board Exam Pattern)",time:"90 Minutes",sections:[{title:"SECTION A — Multiple Choice Questions (1 mark each)",instruction:"Choose the correct option. No negative marking.",qs:[{n:"1",marks:1,text:"If A²=A, then (I+A)³−7A equals:<br><span class='ws-options'><span>(a) I</span><span>(b) A</span><span>(c) 2A</span><span>(d) 3I</span></span>"},{n:"2",marks:1,text:"If A=[[α,β],[γ,−α]] and A²=I, then:<br><span class='ws-options'><span>(a) 1−α²+βγ=0</span><span>(b) 1+α²+βγ=0</span><span>(c) 1−α²−βγ=0</span><span>(d) 1+α²−βγ=0</span></span>"},{n:"3",marks:1,text:"Total number of 3×3 matrices with each entry 2 or 0 is:<br><span class='ws-options'><span>(a) 9</span><span>(b) 27</span><span>(c) 81</span><span>(d) 512</span></span>"},{n:"4",marks:1,text:"If |A|=5, |B|=3 (order 3×3 each), then |3AB|=:<br><span class='ws-options'><span>(a) 45</span><span>(b) 405</span><span>(c) 135</span><span>(d) 15</span></span>"},{n:"5",marks:1,text:"If A is skew-symmetric of odd order, then |A| is:<br><span class='ws-options'><span>(a) 1</span><span>(b) −1</span><span>(c) 0</span><span>(d) Cannot be determined</span></span>"}]},{title:"SECTION B — Assertion–Reason (1 mark each)",instruction:"Same options (a)(b)(c)(d) as above.",qs:[{n:"6",marks:1,text:"<b>Assertion (A):</b> If A is symmetric, then Aⁿ is symmetric for all n∈ℕ.<br><b>Reason (R):</b> (Aⁿ)ᵀ=(Aᵀ)ⁿ=Aⁿ since Aᵀ=A."},{n:"7",marks:1,text:"<b>Assertion (A):</b> AB=AC ⟹ B=C even if A≠0.<br><b>Reason (R):</b> Cancellation law does not hold for matrix multiplication in general."}]},{title:"SECTION C — Short Answer (2 marks each)",instruction:"Show all working. Each question carries 2 marks.",qs:[{n:"8",marks:2,text:"If f(x)=x²−5x+7 and A=[[3,1],[−1,2]], find f(A). What do you observe?"},{n:"9",marks:2,text:"Express A=[[1,2,3],[3,−2,1],[4,5,−1]] as P+Q where P is symmetric and Q is skew-symmetric."},{n:"10",marks:2,text:"If A=[[2,3],[1,2]], find B=A+Aᵀ. Show B is symmetric. Also compute B²."},{n:"11",marks:2,text:"For A=[[1,2],[−1,3]] and B=[[4,0],[1,5]], find (A+B)(A−B) and A²−B². Are they equal? Explain why or why not."}]},{title:"SECTION D — Long Answer (3 marks each)",instruction:"Show complete solution with all steps.",qs:[{n:"12",marks:3,text:"If A=[[1,2,2],[2,1,2],[2,2,1]], prove A²−4A−5I=0. Hence find A⁻¹."},{n:"13",marks:3,text:"Find matrix X such that [[1,2],[3,4]]·X=[[−7,6],[2,1]]. Also find X⁻¹ if it exists."}]},{title:"SECTION E — Case Study (5 marks)",instruction:"Read the passage carefully and answer all sub-parts.",qs:[{n:"14",marks:5,text:"<div class='ws-case-box'>A pharmaceutical company manufactures medicines M₁, M₂, M₃. Raw material requirement (grams/unit):<br>A=[[1,2,1],[3,1,2],[2,3,1]] (rows=medicines; cols=R₁,R₂,R₃)<br>Hospital order: [[500],[400],[300]] units of M₁,M₂,M₃ respectively.</div>(i) Set up matrix equation and find total raw material required. <b>[2]</b><br>(ii) Cost per gram: R₁=₹10, R₂=₹15, R₃=₹20. Find total cost using matrices. <b>[2]</b><br>(iii) If production increases by 20%, represent this using a matrix operation and find new requirement. <b>[1]</b>"}]}]}];
+
+// ══════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════
+var APP={
+  students:['Demo','ADITYA SRIVASTAVA','AATIKA ARIF','ABDULLA','AHTESHAM','ARTH RASTOGI','ARYAN VARSHNEY','ATHARAV RASTOGI','AYUSH RAJ','DEVANSH','DEVIKA RUHELA','FARHEEN','GAURAV KUMAR','GAURI SHARMA','HIRDYANSH GOEL','MOHD ABDULLA','MOHD AMAN','MUHAMMAD ATIF HUSAIN','NAMAMI','NAVEEN KUMAR SAGAR','NYASA AGRAWAL','PARUL SINGH','PRATYAKSH TYAGI','TOOBA TALIB','UMAIR FAHEEM'],
+  phones:{},records:{},
+  currentStudent:null,currentOTP:null,currentWsIdx:null,selectedB64:null
 };
+var TEACHER_PWD='9897060640';
 
-const TEACHER_PWD = '9897060640';
+function loadState(){try{var d=localStorage.getItem('matrixV4');if(d){var s=JSON.parse(d);if(s.students&&s.students.length>0)APP.students=s.students;APP.phones=s.phones||{};APP.records=s.records||{};}}catch(e){}}
+function saveState(){try{localStorage.setItem('matrixV4',JSON.stringify({students:APP.students,phones:APP.phones,records:APP.records}));}catch(e){}}
 
-// Load from storage
-function loadState(){
-  try{
-    var d = localStorage.getItem('matrixApp_v2');
-    if(d){
-      var s = JSON.parse(d);
-      APP.students = s.students||[];
-      APP.phones = s.phones||{};
-      APP.records = s.records||{};
-    }
-  }catch(e){}
-}
+document.addEventListener('DOMContentLoaded',function(){loadState();populateDropdown();});
 
-function saveState(){
-  try{
-    localStorage.setItem('matrixApp_v2', JSON.stringify({
-      students: APP.students,
-      phones: APP.phones,
-      records: APP.records
-    }));
-  }catch(e){}
-}
-
-loadState();
-populateStudentDropdown();
-
-// ============ NAVIGATION ============
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
 function gotoPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
-  if(id==='page-teacher-dash') renderTeacherDash();
-  if(id==='page-student-dash') renderStudentDash();
+  try{
+    document.querySelectorAll('.page,.page-full').forEach(function(p){p.classList.remove('active');});
+    var el=document.getElementById(id);
+    if(!el){console.error('Page not found:',id);return;}
+    el.classList.add('active');
+    window.scrollTo(0,0);
+    if(id==='page-dash')renderDash();
+    if(id==='page-teacher-dash')renderTeacherDash();
+  }catch(e){console.error('gotoPage error:',e);}
 }
 
-// ============ STUDENT LOGIN ============
-function populateStudentDropdown(){
-  var sel = document.getElementById('studentSelect');
-  sel.innerHTML = '<option value="">— Choose your name —</option>';
-  APP.students.forEach(function(s){
-    var opt = document.createElement('option');
-    opt.value = s;
-    opt.textContent = s;
-    sel.appendChild(opt);
-  });
+// ══════════════════════════════════════
+// STUDENT LOGIN
+// ══════════════════════════════════════
+function populateDropdown(){
+  var sel=document.getElementById('studentSelect');
+  sel.innerHTML='<option value="">— Choose your name —</option>';
+  APP.students.forEach(s=>{var o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
 }
 
 function sendOTP(){
-  var name = document.getElementById('studentSelect').value;
-  var phone = document.getElementById('studentPhone').value.trim();
-  var alert_el = document.getElementById('loginAlert');
-
-  if(!name){alert_el.innerHTML='<div class="alert alert-error">⚠ Please select your name</div>';return;}
-  if(!phone || phone.length < 10){alert_el.innerHTML='<div class="alert alert-error">⚠ Please enter a valid 10-digit mobile number</div>';return;}
-
-  // Check if phone matches registered phone
-  var registered = APP.phones[name];
-  if(registered && registered !== phone){
-    alert_el.innerHTML='<div class="alert alert-error">⚠ This phone number is not registered for ' + name + '</div>';
-    return;
-  }
-
-  // Generate OTP
-  var otp = Math.floor(100000 + Math.random()*900000).toString();
-  APP.currentOTP = otp;
-  APP.currentStudent = name;
-
-  // Save phone if not registered
+  var name=document.getElementById('studentSelect').value;
+  var phone=document.getElementById('studentPhone').value.trim();
+  var el=document.getElementById('loginAlert');
+  if(!name){el.innerHTML='<div class="alert alert-error">⚠ Please select your name</div>';return;}
+  if(!phone||phone.length<10||!/^\d{10}$/.test(phone)){el.innerHTML='<div class="alert alert-error">⚠ Enter a valid 10-digit mobile number</div>';return;}
+  var reg=APP.phones[name];
+  if(reg&&reg!==phone){el.innerHTML='<div class="alert alert-error">⚠ Mobile number does not match for '+name+'</div>';return;}
+  var otp=Math.floor(100000+Math.random()*900000).toString();
+  APP.currentOTP=otp;APP.currentStudent=name;
   if(!APP.phones[name]){APP.phones[name]=phone;saveState();}
-
-  alert_el.innerHTML='';
-  document.getElementById('otpSentMsg').textContent = 'OTP sent to +91-' + phone.slice(-4).padStart(phone.length,'•');
-  document.getElementById('demoOtp').textContent = 'Demo OTP: ' + otp;
-  console.log('OTP for', name, ':', otp);
-
-  // Clear OTP inputs
+  el.innerHTML='';
+  document.getElementById('otpSentMsg').textContent='OTP sent to +91 ••••••'+phone.slice(-4);
+  document.getElementById('demoOtp').textContent=otp;
   document.querySelectorAll('.otp-inp').forEach(i=>i.value='');
   gotoPage('page-otp');
   setTimeout(()=>document.querySelectorAll('.otp-inp')[0].focus(),300);
 }
 
-function otpInput(el, idx){
-  var v = el.value.toString().slice(-1);
-  el.value = v;
-  if(v && idx < 5) document.querySelectorAll('.otp-inp')[idx+1].focus();
-  if(!v && idx > 0) document.querySelectorAll('.otp-inp')[idx-1].focus();
+function otpMove(el,idx){
+  var v=el.value.toString().slice(-1);el.value=v;
+  if(v&&idx<5)document.querySelectorAll('.otp-inp')[idx+1].focus();
+  if(!v&&idx>0)document.querySelectorAll('.otp-inp')[idx-1].focus();
 }
 
 function verifyOTP(){
-  var entered = Array.from(document.querySelectorAll('.otp-inp')).map(i=>i.value).join('');
-  var alertEl = document.getElementById('otpAlert');
-  if(entered.length < 6){alertEl.innerHTML='<div class="alert alert-error">⚠ Enter all 6 digits</div>';return;}
-  if(entered === APP.currentOTP){
-    alertEl.innerHTML='<div class="alert alert-success">✓ Verified!</div>';
-    document.getElementById('dashStudentName').textContent = APP.currentStudent;
-    document.getElementById('uploadStudentName2').textContent = APP.currentStudent;
-    setTimeout(()=>gotoPage('page-student-dash'),600);
-  } else {
-    alertEl.innerHTML='<div class="alert alert-error">⚠ Wrong OTP. Please try again.</div>';
-  }
+  var entered=Array.from(document.querySelectorAll('.otp-inp')).map(i=>i.value).join('');
+  var el=document.getElementById('otpAlert');
+  if(entered.length<6){el.innerHTML='<div class="alert alert-error">⚠ Enter all 6 digits</div>';return;}
+  if(entered===APP.currentOTP){
+    el.innerHTML='<div class="alert alert-success">✓ Verified!</div>';
+    document.getElementById('dashName').textContent=APP.currentStudent;
+    document.getElementById('uploadStudentSub').textContent=APP.currentStudent;
+    setTimeout(()=>gotoPage('page-dash'),600);
+  }else{el.innerHTML='<div class="alert alert-error">⚠ Incorrect OTP. Please try again.</div>';}
 }
 
-// ============ STUDENT DASHBOARD ============
-function renderStudentDash(){
-  var s = APP.currentStudent;
-  if(!s) return;
-  var rec = APP.records[s]||{};
-  var submitted=0, scored=0, totalPct=0, pctCount=0;
-
-  var html = '';
-  APP.worksheets.forEach(function(ws,i){
-    var r = rec[i]||{};
-    var status = r.marks!=null?'scored':r.submitted?'submitted':'pending';
-    var badgeClass = status==='scored'?'badge-scored':status==='submitted'?'badge-submitted':'badge-pending';
-    var badgeText = status==='scored'?r.marks+'/'+ws.max:status==='submitted'?'Submitted':'Pending';
-    if(r.submitted) submitted++;
-    if(r.marks!=null){scored++;var pct=Math.round(r.marks/ws.max*100);totalPct+=pct;pctCount++;}
-
-    html += '<div class="sub-card" style="display:flex;justify-content:space-between;align-items:center">';
-    html += '<div><div style="font-weight:600;font-size:14px">'+ws.name+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Max: '+ws.max+' marks</div>';
-    if(r.feedback) html += '<div style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">"'+r.feedback.slice(0,80)+'..."</div>';
-    html += '</div>';
-    html += '<div style="text-align:right"><span class="badge '+badgeClass+'">'+badgeText+'</span>';
-    if(r.marks!=null){var pct=Math.round(r.marks/ws.max*100);html+='<div style="font-size:11px;color:var(--muted);margin-top:4px">'+pct+'%</div>';}
-    html += '</div></div>';
+// ══════════════════════════════════════
+// STUDENT DASHBOARD
+// ══════════════════════════════════════
+function renderDash(){
+  var s=APP.currentStudent;if(!s)return;
+  var rec=APP.records[s]||{};
+  var sub=0,scored=0,tPct=0,pctN=0;
+  var html='';
+  WORKSHEETS.forEach(function(ws,i){
+    var r=rec[i]||{};
+    var status=r.marks!=null?'scored':r.submitted?'submitted':'pending';
+    var bCls={'scored':'badge-scored','submitted':'badge-submitted','pending':'badge-pending'}[status];
+    var bTxt={'scored':r.marks+'/'+ws.max+' marks','submitted':'Submitted — awaiting score','pending':'Not yet submitted'}[status];
+    if(r.submitted)sub++;
+    if(r.marks!=null){scored++;var p=Math.round(r.marks/ws.max*100);tPct+=p;pctN++;}
+    var pct=r.marks!=null?Math.round(r.marks/ws.max*100):null;
+    var col=pct!=null?(pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)'):'var(--muted)';
+    html+='<div class="sub-card" style="cursor:pointer;transition:border-color 0.2s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'\'" onclick="openWs('+i+')">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">';
+    html+='<div style="flex:1"><div style="font-weight:700;font-size:15px;margin-bottom:3px">'+ws.name+'</div>';
+    html+='<div style="font-size:11px;color:var(--muted);margin-bottom:8px">'+ws.topic+'</div>';
+    html+='<div style="display:flex;align-items:center;gap:8px"><span class="badge '+bCls+'">'+bTxt+'</span>';
+    if(status==='pending')html+='<span style="font-size:11px;color:var(--accent)">Tap to view & solve →</span>';
+    html+='</div>';
+    if(r.feedback)html+='<div style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic">💬 '+r.feedback.slice(0,80)+'…</div>';
+    html+='</div>';
+    if(pct!=null)html+='<div style="text-align:right;flex-shrink:0"><div style="font-size:26px;font-weight:700;color:'+col+'">'+pct+'%</div><div style="font-size:11px;color:var(--muted)">'+r.marks+'/'+ws.max+'</div></div>';
+    html+='</div></div>';
   });
-
-  document.getElementById('worksheetCards').innerHTML = html;
-  document.getElementById('dsCompleted').textContent = submitted;
-  document.getElementById('dsScored').textContent = scored;
-  document.getElementById('dsAvg').textContent = pctCount>0?Math.round(totalPct/pctCount)+'%':'—';
+  document.getElementById('wsCardList').innerHTML=html;
+  document.getElementById('ds-sub').textContent=sub;
+  document.getElementById('ds-scored').textContent=scored;
+  document.getElementById('ds-avg').textContent=pctN>0?Math.round(tPct/pctN)+'%':'—';
 }
 
-// ============ UPLOAD ============
+// ══════════════════════════════════════
+// WORKSHEET VIEWER — CBSE FORMAT
+// ══════════════════════════════════════
+function openWs(idx){
+  APP.currentWsIdx=idx;
+  var ws=WORKSHEETS[idx];
+  var totalMarks=ws.sections.reduce((s,sec)=>s+sec.qs.reduce((a,q)=>a+q.marks,0),0);
+
+  var html='';
+  // Header
+  html+='<div class="ws-header">';
+  html+='<div class="ws-header-top">';
+  html+='<div class="ws-school-logo">📐</div>';
+  html+='<div class="ws-school-info">';
+  html+='<div class="ws-school-name">CBSE Class 12 — Mathematics</div>';
+  html+='<div class="ws-school-sub">Nitin Kumar Sir &nbsp;•&nbsp; Sambhal, Uttar Pradesh</div>';
+  html+='</div></div>';
+  html+='<div class="ws-header-bottom">';
+  html+='<span class="ws-meta-item"><b>Topic:</b> Matrices</span>';
+  html+='<span class="ws-meta-item"><b>Time:</b> '+ws.time+'</span>';
+  html+='<span class="ws-meta-item"><b>Max Marks:</b> '+ws.max+'</span>';
+  html+='<span class="ws-meta-item"><b>'+ws.name+'</b></span>';
+  html+='</div></div>';
+
+  // Title
+  html+='<div class="ws-title-strip">';
+  html+='<div class="ws-title-main">'+ws.name.toUpperCase()+' — MATRICES</div>';
+  html+='<div class="ws-title-sub">'+ws.topic+'</div>';
+  html+='</div>';
+
+  // Instructions
+  html+='<div class="ws-instructions"><b>General Instructions:</b> (i) All questions are compulsory. (ii) This paper has five sections — A, B, C, D and E. (iii) Section A has '+ws.sections[0].qs.length+' MCQs of 1 mark each. Section B has Assertion-Reason questions of 1 mark each. Section C has 2-mark questions. Section D has 3-mark questions. Section E has Case Study. (iv) Show all working clearly. Steps carry marks. (v) Use of calculator is not permitted.</div>';
+
+  // Body
+  html+='<div class="ws-body">';
+  ws.sections.forEach(function(sec){
+    html+='<div class="ws-sec-head">';
+    html+='<div class="ws-sec-title">'+sec.title+'</div>';
+    html+='<div class="ws-sec-inst">'+sec.instruction+'</div>';
+    html+='</div>';
+    sec.qs.forEach(function(q){
+      html+='<div class="ws-q-row">';
+      html+='<div class="ws-q-num">'+q.n+'.</div>';
+      html+='<div class="ws-q-body">'+q.text+'</div>';
+      html+='<div class="ws-q-marks">['+q.marks+' mark'+(q.marks>1?'s':'')+']</div>';
+      html+='</div>';
+    });
+  });
+  html+='</div>';
+
+  // Footer
+  html+='<div class="ws-footer">';
+  html+='<span>Nitin Kumar Sir — Class 12 Maths — CBSE</span>';
+  html+='<span>'+ws.name+' &nbsp;|&nbsp; Total: '+ws.max+' Marks</span>';
+  html+='</div>';
+
+  document.getElementById('wsPaper').innerHTML=html;
+  gotoPage('page-ws-view');
+}
+
+function goUpload(){
+  if(APP.currentWsIdx===null)return;
+  var ws=WORKSHEETS[APP.currentWsIdx];
+  document.getElementById('uploadWsName').textContent=ws.name;
+  APP.selectedB64=null;
+  document.getElementById('uploadPreview').style.display='none';
+  document.getElementById('uploadArea').classList.remove('has-file');
+  document.getElementById('uploadHint').textContent='Clear photo of your completed worksheet';
+  document.getElementById('uploadAlert').innerHTML='';
+  document.getElementById('fileInput').value='';
+  gotoPage('page-upload');
+}
+
+// ══════════════════════════════════════
+// FILE UPLOAD
+// ══════════════════════════════════════
 function previewFile(input){
-  var file = input.files[0];
-  if(!file) return;
-  APP.selectedFile = file;
-  var reader = new FileReader();
-  reader.onload = function(e){
-    APP.selectedFileB64 = e.target.result;
-    var prev = document.getElementById('uploadPreview');
-    prev.src = e.target.result;
-    prev.style.display = 'block';
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    APP.selectedB64=e.target.result;
+    var prev=document.getElementById('uploadPreview');
+    prev.src=e.target.result;prev.style.display='block';
     document.getElementById('uploadArea').classList.add('has-file');
-    document.querySelector('#uploadArea .upload-text').textContent = file.name;
+    document.getElementById('uploadHint').textContent='✓ '+file.name;
   };
   reader.readAsDataURL(file);
 }
 
-function submitWorksheet(){
-  var wsIdx = document.getElementById('wsSelect').value;
-  var alertEl = document.getElementById('uploadAlert');
-  if(wsIdx===''){alertEl.innerHTML='<div class="alert alert-error">⚠ Please select a worksheet</div>';return;}
-  if(!APP.selectedFileB64){alertEl.innerHTML='<div class="alert alert-error">⚠ Please upload a photo of your worksheet</div>';return;}
-
-  var ws = APP.worksheets[parseInt(wsIdx)];
-  gotoPage('page-checking');
-  runAICheck(parseInt(wsIdx), ws, APP.selectedFileB64);
+function dropFile(e){
+  e.preventDefault();document.getElementById('uploadArea').classList.remove('dragover');
+  var file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('image/')){
+    var dt=new DataTransfer();dt.items.add(file);
+    document.getElementById('fileInput').files=dt.files;
+    previewFile(document.getElementById('fileInput'));
+  }
 }
 
-// ============ AI CHECKING ============
-async function runAICheck(wsIdx, ws, imageB64){
-  var msgs = ['Analysing your worksheet...','Checking each answer...','Calculating marks...','Generating feedback...'];
-  var prog = document.getElementById('checkProg');
-  var msg = document.getElementById('checkingMsg');
-  var step = 0;
-  var interval = setInterval(function(){
-    if(step < msgs.length){msg.textContent=msgs[step];prog.style.width=(25*(step+1))+'%';step++;}
-  },1500);
+function submitWs(){
+  var el=document.getElementById('uploadAlert');
+  if(!APP.selectedB64){el.innerHTML='<div class="alert alert-error">⚠ Please upload a photo of your completed worksheet</div>';return;}
+  gotoPage('page-checking');
+  runAI(APP.currentWsIdx,WORKSHEETS[APP.currentWsIdx],APP.selectedB64);
+}
 
+// ══════════════════════════════════════
+// AI CHECKING
+// ══════════════════════════════════════
+async function runAI(wsIdx,ws,b64){
+  var msgs=['Reading your handwriting...','Checking each answer carefully...','Applying CBSE step-marking...','Writing personalised feedback...'];
+  var prog=document.getElementById('checkProg');
+  var msgEl=document.getElementById('checkMsg');
+  var step=0;
+  var iv=setInterval(function(){if(step<msgs.length){msgEl.textContent=msgs[step];prog.style.width=(25*(step+1))+'%';step++;}},2000);
   try{
-    // Extract base64 data
-    var b64data = imageB64.split(',')[1];
-    var mediaType = imageB64.split(';')[0].split(':')[1];
+    var imgData=b64.split(',')[1];
+    var mime=b64.split(';')[0].split(':')[1];
+    var qText=ws.sections.map(function(sec){
+      return sec.title+'\n'+sec.qs.map(function(q){return 'Q'+q.n+' ['+q.marks+'m]: '+q.text.replace(/<[^>]+>/g,'');}).join('\n');
+    }).join('\n\n');
 
-    var response = await fetch('https://api.anthropic.com/v1/messages',{
+    var prompt='You are a CBSE Class 12 Mathematics teacher checking a handwritten worksheet on MATRICES.'+
+      '\n\nWorksheet: '+ws.name+' | Topic: '+ws.topic+' | Maximum Marks: '+ws.max+
+      '\n\nQuestions:\n'+qText+
+      '\n\nInstructions: Apply CBSE step-marking. Award partial marks for correct steps. Total marks must be 0 to '+ws.max+'. Be encouraging.'+
+      '\n\nRespond ONLY in valid JSON: {"marks":0,"feedback":"your feedback","strength":"what they did well","improve":"what to improve"}';
+
+    var reqBody={
+      model:'claude-sonnet-4-20250514',
+      max_tokens:800,
+      messages:[{
+        role:'user',
+        content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:imgData}},
+          {type:'text',text:prompt}
+        ]
+      }]
+    };
+
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:[
-            {
-              type:'image',
-              source:{type:'base64',media_type:mediaType,data:b64data}
-            },
-            {
-              type:'text',
-              text:`You are a Class 12 CBSE Maths teacher checking a student's ${ws.name} worksheet on the topic of MATRICES.
-
-The maximum marks for this worksheet is ${ws.max}.
-
-Please:
-1. Carefully examine the student's handwritten work in the image
-2. Check each solution for correctness — method, steps, and final answer
-3. Award marks fairly based on CBSE marking scheme (give step marks)
-4. Provide brief, encouraging feedback
-
-Respond ONLY in this exact JSON format (no other text):
-{
-  "marks": <number between 0 and ${ws.max}>,
-  "percentage": <marks/max * 100, rounded>,
-  "feedback": "<2-3 sentences: what was done well, what to improve>",
-  "correct": <number of correct questions>,
-  "total_questions": <total questions visible>,
-  "errors": "<brief note on main mistakes if any, or 'No major errors'>"
-}`
-            }
-          ]
-        }]
-      })
+      body:JSON.stringify(reqBody)
     });
 
-    clearInterval(interval);
+    clearInterval(iv);
     prog.style.width='100%';
-
-    var data = await response.json();
-    var text = data.content[0].text;
-    var clean = text.replace(/```json|```/g,'').trim();
-    var result = JSON.parse(clean);
-
-    // Save result
-    if(!APP.records[APP.currentStudent]) APP.records[APP.currentStudent]={};
+    var data=await res.json();
+    var rawText=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
+    var cleaned=rawText.replace(/^[^{]*/,'').replace(/[^}]*$/,'');
+    var result=JSON.parse(cleaned);
+    result.marks=Math.max(0,Math.min(ws.max,Math.round(Number(result.marks)||0)));
+    if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
     APP.records[APP.currentStudent][wsIdx]={
-      submitted:true,
-      marks:result.marks,
-      maxMarks:ws.max,
-      feedback:result.feedback,
-      errors:result.errors,
-      imageB64:imageB64,
-      timestamp:new Date().toISOString(),
-      aiChecked:true
+      submitted:true,marks:result.marks,maxMarks:ws.max,
+      feedback:result.feedback||'Good effort!',
+      strength:result.strength||'Attempted the worksheet',
+      improve:result.improve||'Review the topic again',
+      imageB64:b64,timestamp:new Date().toISOString(),aiChecked:true
     };
     saveState();
-
-    // Show result
-    var pct = result.percentage;
-    document.getElementById('resultScore').textContent = result.marks+'/'+ws.max;
-    document.getElementById('resultLabel').textContent = ws.name+' — '+pct+'%';
-    document.getElementById('resultEmoji').textContent = pct>=80?'🎉':pct>=50?'👍':'💪';
-    document.getElementById('aiFeedback').innerHTML =
-      '<p style="margin-bottom:10px">'+result.feedback+'</p>'+
-      '<div style="font-size:12px;color:var(--muted)">Correct: '+result.correct+'/'+result.total_questions+' questions</div>'+
-      (result.errors!=='No major errors'?'<div style="font-size:12px;color:var(--amber);margin-top:6px">⚠ '+result.errors+'</div>':'<div style="font-size:12px;color:var(--green);margin-top:6px">✓ '+result.errors+'</div>');
-
-    setTimeout(()=>gotoPage('page-result'),400);
-
+    showResult(result,ws);
   }catch(err){
-    clearInterval(interval);
-    console.error(err);
-    // Fallback — save as pending
-    if(!APP.records[APP.currentStudent]) APP.records[APP.currentStudent]={};
-    APP.records[APP.currentStudent][wsIdx]={
-      submitted:true,
-      marks:null,
-      maxMarks:ws.max,
-      imageB64:imageB64,
-      timestamp:new Date().toISOString(),
-      aiChecked:false,
-      pending:true
-    };
+    clearInterval(iv);
+    console.error('AI check error:',err);
+    if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
+    APP.records[APP.currentStudent][wsIdx]={submitted:true,marks:null,maxMarks:ws.max,imageB64:b64,timestamp:new Date().toISOString(),aiChecked:false,pending:true};
     saveState();
-    document.getElementById('resultScore').textContent='Submitted';
-    document.getElementById('resultLabel').textContent='Your teacher will check and add marks';
-    document.getElementById('resultEmoji').textContent='📋';
-    document.getElementById('aiFeedback').innerHTML='<p style="color:var(--amber)">AI checking could not complete. Your worksheet has been saved and your teacher will review it manually.</p>';
-    setTimeout(()=>gotoPage('page-result'),400);
+    document.getElementById('resEmoji').textContent='📋';
+    document.getElementById('resScore').textContent='Saved!';
+    document.getElementById('resLabel').textContent='Sir will check and add your marks soon';
+    document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">Your worksheet has been saved. Nitin Kumar Sir will review and add your marks.</div>';
+    setTimeout(function(){gotoPage('page-result');},400);
   }
 }
 
-// ============ TEACHER LOGIN ============
+function showResult(result,ws){
+  var pct=Math.round(result.marks/ws.max*100);
+  document.getElementById('resEmoji').textContent=pct>=80?'🎉':pct>=60?'👍':pct>=40?'💪':'📚';
+  document.getElementById('resScore').textContent=result.marks+'/'+ws.max;
+  document.getElementById('resLabel').textContent=ws.name+' — '+pct+'% &nbsp;|&nbsp; '+APP.currentStudent;
+  document.getElementById('resFeedback').innerHTML=
+    '<p style="margin-bottom:14px;line-height:1.7;color:var(--text)">'+result.feedback+'</p>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px">'+
+    '<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:11px"><div style="color:var(--green);font-weight:700;margin-bottom:5px;font-size:11px">✓ STRENGTH</div>'+result.strength+'</div>'+
+    '<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:11px"><div style="color:var(--amber);font-weight:700;margin-bottom:5px;font-size:11px">→ IMPROVE</div>'+result.improve+'</div></div>';
+  setTimeout(()=>gotoPage('page-result'),400);
+}
+
+// ══════════════════════════════════════
+// TEACHER DASHBOARD
+// ══════════════════════════════════════
 function teacherLogin(){
-  var pwd = document.getElementById('teacherPwd').value;
-  var alertEl = document.getElementById('teacherAlert');
-  if(pwd === TEACHER_PWD){
-    alertEl.innerHTML='<div class="alert alert-success">✓ Access granted</div>';
-    setTimeout(()=>gotoPage('page-teacher-dash'),500);
-  } else {
-    alertEl.innerHTML='<div class="alert alert-error">⚠ Wrong password</div>';
-  }
+  var pwd=document.getElementById('teacherPwd').value;
+  var el=document.getElementById('teacherAlert');
+  if(pwd===TEACHER_PWD){el.innerHTML='<div class="alert alert-success">✓ Access granted</div>';setTimeout(()=>gotoPage('page-teacher-dash'),500);}
+  else el.innerHTML='<div class="alert alert-error">⚠ Incorrect password</div>';
 }
 
-// ============ TEACHER DASHBOARD ============
 function renderTeacherDash(){
-  var totalSubs=0, pending=0, totalPct=0, pctCount=0;
-  APP.students.forEach(function(s){
-    var rec = APP.records[s]||{};
-    APP.worksheets.forEach(function(ws,i){
-      var r = rec[i];
-      if(r&&r.submitted){
-        totalSubs++;
-        if(r.marks==null) pending++;
-        else {totalPct+=Math.round(r.marks/ws.max*100);pctCount++;}
-      }
-    });
-  });
-  document.getElementById('tTotal').textContent = APP.students.length;
-  document.getElementById('tSubmissions').textContent = totalSubs;
-  document.getElementById('tPending').textContent = pending;
-  document.getElementById('tAvg').textContent = pctCount>0?Math.round(totalPct/pctCount)+'%':'—';
-  renderSubmissions();
-  renderMarksTable();
-  renderAnalysis();
+  var ts=0,pend=0,tPct=0,pN=0;
+  APP.students.forEach(s=>{var rec=APP.records[s]||{};WORKSHEETS.forEach((ws,i)=>{var r=rec[i];if(r&&r.submitted){ts++;if(r.marks==null)pend++;else{tPct+=Math.round(r.marks/ws.max*100);pN++;}}});});
+  document.getElementById('tTotal').textContent=APP.students.length;
+  document.getElementById('tSubs').textContent=ts;
+  document.getElementById('tPending').textContent=pend;
+  document.getElementById('tAvg').textContent=pN>0?Math.round(tPct/pN)+'%':'—';
+  renderSubs();renderMarks();renderAnalysis();
 }
 
-function renderSubmissions(){
-  var html='';
-  var found=false;
+function renderSubs(){
+  var html='';var found=false;
   APP.students.forEach(function(s){
-    var rec = APP.records[s]||{};
-    APP.worksheets.forEach(function(ws,i){
-      var r = rec[i];
-      if(r&&r.submitted){
-        found=true;
-        var ts = r.timestamp?new Date(r.timestamp).toLocaleDateString('en-IN'):'—';
-        html+='<div class="sub-card">';
-        html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">';
-        html+='<div><div style="font-weight:600">'+s+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px">'+ws.name+' • Submitted '+ts+'</div>';
-        if(r.aiChecked) html+='<div class="ai-badge" style="margin-top:6px"><span>🤖</span> AI checked</div>';
-        if(r.pending) html+='<span class="badge badge-submitted">Pending manual review</span>';
-        html+='</div>';
-        html+='<div style="text-align:right">';
-        if(r.marks!=null) html+='<div style="font-size:20px;font-weight:700;color:var(--green)">'+r.marks+'/'+ws.max+'</div>';
-        else html+='<span class="badge badge-submitted">Not scored</span>';
-        html+='</div></div>';
-        if(r.imageB64) html+='<img src="'+r.imageB64+'" class="sub-img" onclick="openLightbox(this.src)" alt="Worksheet photo">';
-        if(r.feedback) html+='<div style="font-size:13px;color:var(--muted);margin-top:8px;padding:10px;background:var(--surface2);border-radius:8px">💬 '+r.feedback+'</div>';
-        html+='<div class="score-form" style="margin-top:12px">';
-        html+='<input type="number" min="0" max="'+ws.max+'" id="mscore_'+s.replace(/\s/g,'_')+'_'+i+'" placeholder="Marks" value="'+(r.marks!=null?r.marks:'')+'" style="width:90px;font-family:var(--mono);font-weight:700">';
-        html+='<span style="font-size:13px;color:var(--muted)">/ '+ws.max+'</span>';
-        html+='<button class="btn btn-green btn-sm" onclick="saveManualScore(\''+s+'\','+i+','+ws.max+')">💾 Save score</button>';
-        html+='</div></div>';
-      }
+    var rec=APP.records[s]||{};
+    WORKSHEETS.forEach(function(ws,i){
+      var r=rec[i];if(!(r&&r.submitted))return;
+      found=true;
+      var ts=r.timestamp?new Date(r.timestamp).toLocaleString('en-IN'):'—';
+      var pct=r.marks!=null?Math.round(r.marks/ws.max*100):null;
+      var col=pct!=null?(pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)'):'var(--muted)';
+      html+='<div class="sub-card">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">';
+      html+='<div><div style="font-weight:700;font-size:15px">'+s+'</div>';
+      html+='<div style="font-size:12px;color:var(--muted);margin-top:2px">'+ws.name+' — '+ws.topic+'</div>';
+      html+='<div style="font-size:11px;color:var(--muted);margin-top:2px">Submitted: '+ts+'</div>';
+      if(r.aiChecked)html+='<span class="ai-tag" style="margin-top:6px">🤖 AI Checked</span>';
+      if(r.feedback)html+='<div style="font-size:12.5px;color:var(--text);margin-top:10px;background:var(--surface2);padding:10px;border-radius:8px;line-height:1.6">💬 '+r.feedback+'</div>';
+      if(r.strength)html+='<div style="font-size:11.5px;color:var(--green);margin-top:5px">✓ '+r.strength+'</div>';
+      if(r.improve)html+='<div style="font-size:11.5px;color:var(--amber);margin-top:3px">→ '+r.improve+'</div>';
+      html+='</div>';
+      html+='<div style="text-align:right;flex-shrink:0">';
+      if(pct!=null)html+='<div style="font-size:28px;font-weight:700;color:'+col+'">'+r.marks+'/'+ws.max+'</div><div style="font-size:12px;color:var(--muted)">'+pct+'%</div>';
+      else html+='<span class="badge badge-submitted">Not scored</span>';
+      html+='</div></div>';
+      if(r.imageB64)html+='<img src="'+r.imageB64+'" class="sub-img" onclick="openLb(this.src)" alt="Worksheet photo">';
+      html+='<div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">';
+      html+='<input type="number" min="0" max="'+ws.max+'" id="sc_'+s.replace(/\s/g,'_')+'_'+i+'" value="'+(r.marks!=null?r.marks:'')+'" placeholder="/'+ws.max+'" style="width:100px;font-family:var(--mono);font-weight:700;font-size:16px;text-align:center">';
+      html+='<button class="btn btn-green btn-sm" onclick="saveScore(\''+s.replace(/'/g,"\\'")+'\',' +i+','+ws.max+')">💾 Save Score</button>';
+      html+='</div></div>';
     });
   });
-  if(!found) html='<div class="alert alert-info">📭 No submissions yet. Students will appear here after they submit worksheets.</div>';
-  document.getElementById('submissionsList').innerHTML=html;
+  if(!found)html='<div class="alert alert-info">📭 No submissions yet. Worksheets will appear here after students submit.</div>';
+  document.getElementById('subList').innerHTML=html;
 }
 
-function saveManualScore(student,wsIdx,maxMarks){
-  var key='mscore_'+student.replace(/\s/g,'_')+'_'+wsIdx;
+function saveScore(student,wsIdx,maxMarks){
+  var key='sc_'+student.replace(/\s/g,'_')+'_'+wsIdx;
   var val=document.getElementById(key).value;
-  if(val==='') return alert('Enter marks first');
+  if(val===''){alert('Enter marks first');return;}
   var m=parseInt(val);
-  if(m<0||m>maxMarks){alert('Marks must be 0 to '+maxMarks);return;}
-  if(!APP.records[student]) APP.records[student]={};
-  if(!APP.records[student][wsIdx]) APP.records[student][wsIdx]={submitted:true};
+  if(isNaN(m)||m<0||m>maxMarks){alert('Marks must be 0 to '+maxMarks);return;}
+  if(!APP.records[student])APP.records[student]={};
+  if(!APP.records[student][wsIdx])APP.records[student][wsIdx]={submitted:true};
   APP.records[student][wsIdx].marks=m;
   APP.records[student][wsIdx].maxMarks=maxMarks;
-  saveState();
-  renderTeacherDash();
-  alert('Score saved for '+student+' — '+m+'/'+maxMarks);
+  saveState();renderTeacherDash();
 }
 
-function renderMarksTable(){
-  var ws=APP.worksheets;
-  var thead='<tr><th>#</th><th>Student</th>';
-  ws.forEach(function(w){thead+='<th>'+w.name+'<br><span style="font-weight:400;font-size:10px">Max '+w.max+'</span></th>';});
+function renderMarks(){
+  var ws=WORKSHEETS;
+  var thead='<tr><th>#</th><th>Student Name</th>';
+  ws.forEach(w=>thead+='<th style="white-space:nowrap">'+w.name+'<br><span style="color:var(--border);font-size:9px">/'+w.max+'</span></th>');
   thead+='<th>Total</th><th>%</th></tr>';
   var tbody='';
   APP.students.forEach(function(s,idx){
-    var rec=APP.records[s]||{};
-    var total=0,maxT=0;
-    tbody+='<tr><td style="color:var(--muted)">'+(idx+1)+'</td><td style="font-weight:600">'+s+'</td>';
+    var rec=APP.records[s]||{};var t=0,mx=0;
+    tbody+='<tr><td style="color:var(--muted);font-size:11px">'+(idx+1)+'</td><td style="font-weight:600;white-space:nowrap;font-size:13px">'+s+'</td>';
     ws.forEach(function(w,i){
       var r=rec[i];
-      if(r&&r.marks!=null){
-        var pct=Math.round(r.marks/w.max*100);
-        var cls=pct>=80?'score-high':pct>=50?'score-mid':'score-low';
-        tbody+='<td class="score-cell '+cls+'">'+r.marks+'</td>';
-        total+=r.marks;maxT+=w.max;
-      } else if(r&&r.submitted){
-        tbody+='<td><span class="badge badge-submitted">Sub</span></td>';
-        maxT+=w.max;
-      } else {
-        tbody+='<td style="color:var(--muted)">—</td>';
-      }
+      if(r&&r.marks!=null){var p=Math.round(r.marks/w.max*100);var c=p>=80?'sc-hi':p>=50?'sc-md':'sc-lo';tbody+='<td class="'+c+'">'+r.marks+'</td>';t+=r.marks;mx+=w.max;}
+      else if(r&&r.submitted)tbody+='<td><span class="badge badge-submitted" style="font-size:10px">Sub</span></td>';
+      else tbody+='<td style="color:#2a3a50">—</td>';
     });
-    var ovPct=maxT>0?Math.round(total/maxT*100):null;
-    var cls=ovPct!=null?(ovPct>=80?'score-high':ovPct>=50?'score-mid':'score-low'):'';
-    tbody+='<td class="score-cell '+cls+'">'+(maxT>0?total:'—')+'</td>';
-    tbody+='<td class="score-cell '+cls+'">'+(ovPct!=null?ovPct+'%':'—')+'</td>';
-    tbody+='</tr>';
+    var op=mx>0?Math.round(t/mx*100):null;
+    var oc=op!=null?(op>=80?'sc-hi':op>=50?'sc-md':'sc-lo'):'';
+    tbody+='<td class="'+oc+'">'+(mx>0?t:'—')+'</td><td class="'+oc+'">'+(op!=null?op+'%':'—')+'</td></tr>';
   });
   document.getElementById('marksTable').querySelector('thead').innerHTML=thead;
   document.getElementById('marksTable').querySelector('tbody').innerHTML=tbody;
 }
 
 function renderAnalysis(){
-  var ws=APP.worksheets;
-  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">';
+  var ws=WORKSHEETS;var html='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:2rem">';
   ws.forEach(function(w,i){
-    var scores=[],total=0,count=0;
-    APP.students.forEach(function(s){
-      var r=(APP.records[s]||{})[i];
-      if(r&&r.marks!=null){scores.push(r.marks);total+=r.marks;count++;}
-    });
-    var avg=count>0?Math.round(total/count*10)/10:null;
-    var pct=avg!=null?Math.round(avg/w.max*100):0;
-    var barColor=pct>=80?'#10b981':pct>=50?'#f59e0b':'#ef4444';
-    html+='<div class="sub-card"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font-weight:600;font-size:13px">'+w.name+'</span><span class="score-cell" style="color:'+(pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)')+'font-size:14px">'+(avg!=null?avg+'/'+w.max:'—')+'</span></div>';
-    html+='<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>';
-    html+='<div style="font-size:11px;color:var(--muted);margin-top:6px">'+count+' submissions • Class avg '+pct+'%</div></div>';
+    var tot=0,cnt=0;
+    APP.students.forEach(s=>{var r=(APP.records[s]||{})[i];if(r&&r.marks!=null){tot+=r.marks;cnt++;}});
+    var avg=cnt>0?(tot/cnt).toFixed(1):null;
+    var pct=avg?Math.round(avg/w.max*100):0;
+    var bc=pct>=80?'#10b981':pct>=50?'#f59e0b':'#ef4444';
+    html+='<div class="sub-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">';
+    html+='<div><div style="font-weight:700;font-size:14px">'+w.name+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px">'+w.topic.slice(0,36)+'…</div></div>';
+    html+='<div style="text-align:right"><div style="font-size:20px;font-weight:700;color:'+bc+'">'+(avg?avg+'/'+w.max:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+cnt+' scored</div></div></div>';
+    html+='<div class="prog-bar"><div class="prog-fill" style="width:'+pct+'%;background:'+bc+'"></div></div>';
+    html+='<div style="font-size:11px;color:var(--muted);margin-top:5px">Class average: '+pct+'%</div></div>';
   });
-  html+='</div>';
-
-  html+='<div style="margin-top:1.5rem;font-weight:600;font-size:14px;margin-bottom:1rem">Student performance overview</div>';
+  html+='</div><div style="font-weight:700;font-size:14px;margin-bottom:1rem">Student Rankings (by overall %)</div>';
   var ranked=APP.students.map(function(s){
-    var rec=APP.records[s]||{};
-    var t=0,mx=0;
-    ws.forEach(function(w,i){var r=rec[i];if(r&&r.marks!=null){t+=r.marks;mx+=w.max;}});
-    return {name:s,pct:mx>0?Math.round(t/mx*100):null,total:t,max:mx};
-  }).filter(function(s){return s.pct!=null;}).sort(function(a,b){return b.pct-a.pct;});
-
-  ranked.forEach(function(s,rank){
-    var cls=s.pct>=80?'score-high':s.pct>=50?'score-mid':'score-low';
-    var barColor=s.pct>=80?'#10b981':s.pct>=50?'#f59e0b':'#ef4444';
-    html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">';
-    html+='<span style="color:var(--muted);font-size:12px;min-width:20px">'+(rank+1)+'</span>';
-    html+='<span style="min-width:150px;font-size:13px">'+s.name+'</span>';
-    html+='<div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="width:'+s.pct+'%;height:100%;background:'+barColor+';border-radius:4px"></div></div>';
-    html+='<span class="score-cell '+cls+'" style="min-width:50px;text-align:right">'+s.pct+'%</span>';
+    var rec=APP.records[s]||{};var t=0,mx=0;
+    ws.forEach((w,i)=>{var r=rec[i];if(r&&r.marks!=null){t+=r.marks;mx+=w.max;}});
+    return{name:s,pct:mx>0?Math.round(t/mx*100):null,t,mx};
+  }).filter(s=>s.pct!=null).sort((a,b)=>b.pct-a.pct);
+  if(ranked.length===0)html+='<div class="alert alert-info">No scored data yet.</div>';
+  ranked.forEach((s,rank)=>{
+    var bc=s.pct>=80?'#10b981':s.pct>=50?'#f59e0b':'#ef4444';
+    var cc=s.pct>=80?'sc-hi':s.pct>=50?'sc-md':'sc-lo';
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">';
+    html+='<span style="color:var(--muted);font-size:12px;min-width:22px;text-align:right">'+(rank+1)+'.</span>';
+    html+='<span style="min-width:200px;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</span>';
+    html+='<div style="flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="width:'+s.pct+'%;height:100%;background:'+bc+';border-radius:4px"></div></div>';
+    html+='<span class="'+cc+'" style="min-width:44px;text-align:right;font-family:var(--mono);font-weight:700;font-size:13px">'+s.pct+'%</span>';
     html+='</div>';
   });
-  if(ranked.length===0) html+='<div class="alert alert-info">No scored data yet.</div>';
-  document.getElementById('analysisContent').innerHTML=html;
+  document.getElementById('analysisDiv').innerHTML=html;
 }
 
-// ============ STUDENT MANAGER ============
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('dtab-'+id).classList.add('active');
+}
+
 function openStudentMgr(){
   document.getElementById('studentListInput').value=APP.students.join('\n');
-  var phoneLines=Object.entries(APP.phones).map(function(e){return e[0]+':'+e[1];}).join('\n');
-  document.getElementById('phoneListInput').value=phoneLines;
-  document.getElementById('studentMgrModal').style.display='flex';
+  document.getElementById('phoneListInput').value=Object.entries(APP.phones).map(e=>e[0]+':'+e[1]).join('\n');
+  document.getElementById('studentMgrModal').classList.add('open');
 }
 
 function saveStudents(){
-  var names=document.getElementById('studentListInput').value.trim().split('\n').map(function(n){return n.trim();}).filter(function(n){return n.length>0;});
+  var names=document.getElementById('studentListInput').value.trim().split('\n').map(n=>n.trim()).filter(n=>n);
+  if(!names.includes('Demo'))names.unshift('Demo');
   APP.students=names;
-  var phoneLines=document.getElementById('phoneListInput').value.trim().split('\n');
-  phoneLines.forEach(function(line){
-    var parts=line.split(':');
-    if(parts.length===2){APP.phones[parts[0].trim()]=parts[1].trim();}
+  document.getElementById('phoneListInput').value.trim().split('\n').forEach(line=>{
+    var p=line.split(':');if(p.length===2&&p[1].trim())APP.phones[p[0].trim()]=p[1].trim();
   });
-  saveState();
-  populateStudentDropdown();
-  document.getElementById('studentMgrModal').style.display='none';
-  renderTeacherDash();
-  alert('✓ '+names.length+' students saved!');
+  saveState();populateDropdown();
+  document.getElementById('studentMgrModal').classList.remove('open');
+  renderTeacherDash();alert('✓ '+names.length+' students saved!');
 }
 
-// ============ UTILITIES ============
-function switchDashTab(id){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('dtab-'+id).classList.add('active');
-}
-
-function openLightbox(src){
-  document.getElementById('lightboxImg').src=src;
-  document.getElementById('lightbox').classList.add('open');
-}
+function openLb(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
 
 function exportCSV(){
-  var ws=APP.worksheets;
-  var rows=[['Student'].concat(ws.map(function(w){return w.name;})).concat(['Total','%'])];
-  APP.students.forEach(function(s){
-    var rec=APP.records[s]||{};
-    var row=[s];var total=0,max=0;
-    ws.forEach(function(w,i){
-      var r=rec[i];
-      if(r&&r.marks!=null){row.push(r.marks);total+=r.marks;max+=w.max;}
-      else row.push('');
-    });
-    row.push(max>0?total:'');
-    row.push(max>0?Math.round(total/max*100)+'%':'');
-    rows.push(row);
+  var ws=WORKSHEETS;
+  var rows=[['#','Student',...ws.map(w=>w.name),'Total','%']];
+  APP.students.forEach((s,idx)=>{
+    var rec=APP.records[s]||{};var row=[idx+1,s];var t=0,mx=0;
+    ws.forEach((w,i)=>{var r=rec[i];if(r&&r.marks!=null){row.push(r.marks);t+=r.marks;mx+=w.max;}else row.push('');});
+    row.push(mx>0?t:'');row.push(mx>0?Math.round(t/mx*100)+'%':'');rows.push(row);
   });
-  var csv=rows.map(function(r){return r.join(',');}).join('\n');
-  var blob=new Blob([csv],{type:'text/csv'});
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='matrix_marks_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
-  a.click();
+  var csv=rows.map(r=>r.join(',')).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='Matrix_Marks_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';a.click();
 }
 </script>
 </body>
