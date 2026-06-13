@@ -192,6 +192,13 @@ tr:hover td{background:rgba(255,255,255,0.015)}
   .ws-q-row{grid-template-columns:28px 1fr 44px;font-size:12.5px}
   .ws-options{grid-template-columns:1fr}
 }
+
+/* OCR Progress Overlay */
+.ocr-overlay{display:none;position:fixed;inset:0;background:rgba(7,16,31,0.95);z-index:300;align-items:center;justify-content:center;flex-direction:column}
+.ocr-overlay.open{display:flex}
+.ocr-status{font-size:14px;color:var(--muted);margin-top:1rem;text-align:center;max-width:400px;line-height:1.6}
+.ocr-log{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);max-width:500px;width:90%;max-height:120px;overflow-y:auto;margin-top:1rem}
+.ocr-log-item{margin:2px 0}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/groq-sdk@0.3.0/dist/groq-sdk.umd.min.js"></script>
@@ -201,6 +208,16 @@ tr:hover td{background:rgba(255,255,255,0.015)}
 
 <div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
   <img id="lightboxImg" src="" alt="Worksheet">
+</div>
+
+<!-- OCR Processing Overlay -->
+<div class="ocr-overlay" id="ocrOverlay">
+  <div class="spinner" style="width:56px;height:56px;border-width:3px"></div>
+  <div class="ocr-status" id="ocrStatus">Initializing AI checker...</div>
+  <div class="prog-bar" style="margin-top:1.5rem;width:300px;height:8px">
+    <div class="prog-fill" id="ocrProg" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div>
+  </div>
+  <div class="ocr-log" id="ocrLog"></div>
 </div>
 
 <div class="modal-overlay" id="studentMgrModal">
@@ -406,7 +423,8 @@ tr:hover td{background:rgba(255,255,255,0.015)}
         <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
           <div style="font-size:12px;color:var(--muted);line-height:1.6">
             <b>Current Status:</b> <span id="groqCurrentStatus">Checking...</span><br>
-            <b>Model:</b> llama-3.3-70b-versatile<br>
+            <b>Primary Model:</b> llama-3.2-11b-vision-preview (analyzes images directly)<br>
+            <b>Fallback Model:</b> llama-3.3-70b-versatile (text-based with OCR)<br>
             <b>Free tier limits:</b> 30 requests/min, 14,400 requests/day<br>
             <b>Accuracy:</b> Much better than local keyword matching
           </div>
@@ -741,11 +759,14 @@ function submitWs(){
 // AI CHECKING
 // ══════════════════════════════════════
 async function runAI(wsIdx,ws,imagesArr){
+  console.log('=== runAI STARTED (Vision Mode) ===', {wsIdx, wsName: ws.name, imageCount: imagesArr.length});
+
   var ocrStatus = document.getElementById('ocrStatus');
   var ocrProg = document.getElementById('ocrProg');
   var ocrLog = document.getElementById('ocrLog');
 
   function log(msg){
+    console.log('[AI]', msg);
     var div = document.createElement('div');
     div.className = 'ocr-log-item';
     div.textContent = '> ' + msg;
@@ -754,55 +775,39 @@ async function runAI(wsIdx,ws,imagesArr){
   }
 
   try{
-    // STEP 1: OCR with Tesseract.js (FREE, browser-based)
-    ocrStatus.textContent = 'Step 1/3: Reading handwriting from ' + imagesArr.length + ' page(s)...';
+    ocrStatus.textContent = 'AI Teacher is analyzing your worksheet photos...';
     ocrProg.style.width = '10%';
-    log('Loading Tesseract OCR engine... (one-time download ~4MB)');
+    log('Starting AI vision analysis...');
 
-    var worker = await Tesseract.createWorker('eng', 1, {
-      logger: m => {
-        if(m.status === 'recognizing text'){
-          ocrProg.style.width = (10 + m.progress * 25) + '%';
-        }
-      }
-    });
+    var GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
+    console.log('Groq API key present:', GROQ_API_KEY ? 'YES' : 'NO');
 
-    var allText = '';
-    for(var i=0; i<imagesArr.length; i++){
-      log('Reading page ' + (i+1) + ' of ' + imagesArr.length + '...');
-      var result = await worker.recognize(imagesArr[i]);
-      allText += '\n--- PAGE ' + (i+1) + ' ---\n' + result.data.text;
+    if(!GROQ_API_KEY){
+      log('No Groq API key found. Please add your API key in Teacher Dashboard > AI Settings.');
+      log('Get a free key at: https://console.groq.com/keys');
+      throw new Error('No Groq API key configured. Please add your API key in Teacher Dashboard.');
     }
-    await worker.terminate();
 
-    log('OCR complete! Extracted ' + allText.length + ' characters.');
-    log('Sample: "' + allText.substring(0, 80).replace(/\s+/g, ' ') + '..."');
-
-    // STEP 2: AI Evaluation with Groq (FREE API, no credit card)
-    ocrStatus.textContent = 'Step 2/3: AI teacher evaluating your answers...';
-    ocrProg.style.width = '40%';
-    log('Sending to Groq AI for evaluation...');
-
-    // Build the prompt with worksheet questions and student answers
+    // Build the prompt with worksheet questions
     var qText = ws.sections.map(function(sec){
       return sec.title + '\n' + sec.qs.map(function(q){
         return 'Q' + q.n + ' [' + q.marks + ' marks]: ' + q.text.replace(/<[^>]+>/g, '');
       }).join('\n');
     }).join('\n\n');
 
-    var prompt = 'You are Nitin Kumar Sir, a CBSE Class 12 Mathematics teacher. You are checking a student\'s handwritten worksheet on MATRICES.\n\n' +
+    var systemPrompt = 'You are Nitin Kumar Sir, a CBSE Class 12 Mathematics teacher checking a student\'s handwritten worksheet on MATRICES.\n\n' +
       'WORKSHEET: ' + ws.name + '\n' +
       'TOPIC: ' + ws.topic + '\n' +
       'MAXIMUM MARKS: ' + ws.max + '\n\n' +
       'QUESTIONS:\n' + qText + '\n\n' +
-      'STUDENT\'S HANDWRITTEN ANSWERS (OCR extracted):\n' + allText + '\n\n' +
       'INSTRUCTIONS:\n' +
-      '1. Evaluate each question the student attempted\n' +
-      '2. Apply CBSE step-marking: award partial marks for correct steps\n' +
-      '3. Check if matrix calculations are correct\n' +
-      '4. Look for proper working/steps shown\n' +
-      '5. Be encouraging but honest\n' +
-      '6. Total marks must be between 0 and ' + ws.max + '\n\n' +
+      '1. Look at the student\'s handwritten answers in the images\n' +
+      '2. Evaluate each question they attempted\n' +
+      '3. Apply CBSE step-marking: award partial marks for correct steps\n' +
+      '4. Check if matrix calculations are correct\n' +
+      '5. Look for proper working/steps shown\n' +
+      '6. Be encouraging but honest\n' +
+      '7. Total marks must be between 0 and ' + ws.max + '\n\n' +
       'Respond ONLY in this JSON format:\n' +
       '{\n' +
       '  "marks": <number 0-' + ws.max + '>,\n' +
@@ -812,48 +817,86 @@ async function runAI(wsIdx,ws,imagesArr){
       '  "questionBreakdown": "<brief note on which questions were good/poor>"\n' +
       '}';
 
-    // Call Groq API (FREE tier - no credit card needed!)
-    // Get API key from: https://console.groq.com/keys
-    var GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
+    log('Preparing images for AI vision analysis...');
+    ocrProg.style.width = '30%';
 
-    if(!GROQ_API_KEY){
-      // Fallback to local analysis if no API key
-      log('No Groq API key found. Using local analysis...');
-      log('Tip: Add your free Groq API key in Teacher Dashboard for better accuracy!');
-      var result = analyzeWorksheetLocal(ws, allText);
-      saveAndShowResult(result, wsIdx, ws, imagesArr, allText);
-      return;
+    // Build message content with images
+    var messageContent = [{type: 'text', text: systemPrompt}];
+
+    // Add each image as base64
+    for(var i=0; i<imagesArr.length; i++){
+      log('Adding image ' + (i+1) + ' of ' + imagesArr.length + '...');
+      var base64Data = imagesArr[i].split(',')[1]; // Remove data:image/jpeg;base64, prefix
+      var mimeType = imagesArr[i].split(';')[0].split(':')[1];
+
+      messageContent.push({
+        type: 'image_url',
+        image_url: {
+          url: 'data:' + mimeType + ';base64,' + base64Data
+        }
+      });
     }
 
-    var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + GROQ_API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',  // Excellent at math reasoning
-        messages: [{role: 'user', content: prompt}],
-        temperature: 0.3,  // Lower = more consistent grading
-        max_tokens: 800
-      })
-    });
+    log('Sending ' + imagesArr.length + ' image(s) to Groq AI Vision...');
+    ocrProg.style.width = '50%';
+
+    // Call Groq Vision API
+    var response;
+    try{
+      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + GROQ_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'llama-3.2-11b-vision-preview',  // Vision-capable model!
+          messages: [{role: 'user', content: messageContent}],
+          temperature: 0.2,
+          max_tokens: 1000
+        })
+      });
+    }catch(fetchErr){
+      console.error('Fetch error:', fetchErr);
+      throw new Error('Network error: ' + fetchErr.message);
+    }
+
+    console.log('Groq API response status:', response.status);
 
     if(!response.ok){
-      var errorData = await response.json();
-      throw new Error('Groq API error: ' + (errorData.error?.message || response.statusText));
+      var errorText = await response.text();
+      console.error('Groq API error:', errorText);
+      var errorData;
+      try{ errorData = JSON.parse(errorText); }catch(e){}
+      var errorMsg = (errorData && errorData.error && errorData.error.message) ? errorData.error.message : response.statusText;
+
+      // If vision model fails, try fallback to text model with basic OCR
+      if(response.status === 400 || response.status === 404){
+        log('Vision model not available. Trying fallback with text-based analysis...');
+        return await fallbackTextAnalysis(wsIdx, ws, imagesArr, GROQ_API_KEY);
+      }
+
+      throw new Error('Groq API error (' + response.status + '): ' + errorMsg);
     }
 
     var data = await response.json();
+    console.log('Groq API response received');
+
     var aiResponse = data.choices[0].message.content;
+    console.log('AI raw response:', aiResponse.substring(0, 500));
 
     // Parse JSON from AI response
     var jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
     var result;
     if(jsonMatch){
-      result = JSON.parse(jsonMatch[0]);
+      try{
+        result = JSON.parse(jsonMatch[0]);
+      }catch(parseErr){
+        console.error('JSON parse error:', parseErr);
+        throw new Error('AI returned invalid JSON');
+      }
     } else {
-      throw new Error('AI did not return valid JSON');
+      throw new Error('AI did not return JSON format');
     }
 
     // Validate and clamp marks
@@ -864,36 +907,145 @@ async function runAI(wsIdx,ws,imagesArr){
 
     log('AI evaluation complete! Marks: ' + result.marks + '/' + ws.max);
 
-    saveAndShowResult(result, wsIdx, ws, imagesArr, allText);
+    saveAndShowResult(result, wsIdx, ws, imagesArr, 'Vision analysis completed');
 
   }catch(err){
-    console.error('AI check error:', err);
-    log('Error: ' + err.message);
-    log('Falling back to local analysis...');
+    console.error('=== runAI ERROR ===', err);
+    log('ERROR: ' + err.message);
 
-    // Fallback to local analysis
+    // Try fallback
     try{
-      var result = analyzeWorksheetLocal(ws, allText || '');
-      saveAndShowResult(result, wsIdx, ws, imagesArr, allText || '');
+      var GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
+      if(GROQ_API_KEY){
+        log('Trying fallback text-based analysis...');
+        await fallbackTextAnalysis(wsIdx, ws, imagesArr, GROQ_API_KEY);
+      } else {
+        throw new Error('No API key');
+      }
     }catch(fallbackErr){
-      // Ultimate fallback
-      if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
-      APP.records[APP.currentStudent][wsIdx]={
-        submitted:true,marks:0,maxMarks:ws.max,
-        images:imagesArr,timestamp:new Date().toISOString(),
-        aiChecked:false,pending:true,
-        feedback:'AI auto-check encountered an error. Nitin Kumar Sir will review your worksheet photo(s) and update your marks shortly.'
-      };
-      saveState();
+      console.error('Fallback failed:', fallbackErr);
 
-      document.getElementById('ocrOverlay').classList.remove('open');
-      document.getElementById('resEmoji').textContent='📋';
-      document.getElementById('resScore').textContent='0/'+ws.max;
-      document.getElementById('resLabel').textContent="Awaiting Sir's review";
-      document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">AI checking encountered an error, so 0 marks were recorded for now. Nitin Kumar Sir will review your worksheet photo(s) and update your marks soon.</div>';
-      setTimeout(function(){gotoPage('page-result');},400);
+      // Ultimate fallback - local analysis
+      log('Using local analysis as final fallback...');
+      try{
+        var localResult = analyzeWorksheetLocal(ws, '');
+        saveAndShowResult(localResult, wsIdx, ws, imagesArr, 'Local fallback');
+      }catch(localErr){
+        // Absolute fallback
+        if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
+        APP.records[APP.currentStudent][wsIdx]={
+          submitted:true,marks:0,maxMarks:ws.max,
+          images:imagesArr,timestamp:new Date().toISOString(),
+          aiChecked:false,pending:true,
+          feedback:'AI checking failed: ' + err.message + '. Nitin Kumar Sir will review your worksheet and update marks.'
+        };
+        saveState();
+
+        document.getElementById('ocrOverlay').classList.remove('open');
+        document.getElementById('resEmoji').textContent='📋';
+        document.getElementById('resScore').textContent='0/'+ws.max;
+        document.getElementById('resLabel').textContent="Awaiting Sir's review";
+        document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">AI checking encountered an error: ' + err.message + '. 0 marks recorded for now. Sir will review your worksheet soon.</div>';
+        setTimeout(function(){gotoPage('page-result');},400);
+      }
     }
   }
+}
+
+// Fallback: Use Tesseract OCR + text model when vision fails
+async function fallbackTextAnalysis(wsIdx, ws, imagesArr, GROQ_API_KEY){
+  var ocrLog = document.getElementById('ocrLog');
+  var ocrProg = document.getElementById('ocrProg');
+
+  function log(msg){
+    console.log('[Fallback]', msg);
+    var div = document.createElement('div');
+    div.className = 'ocr-log-item';
+    div.textContent = '> ' + msg;
+    ocrLog.appendChild(div);
+    ocrLog.scrollTop = ocrLog.scrollHeight;
+  }
+
+  log('Starting Tesseract OCR fallback...');
+  ocrProg.style.width = '60%';
+
+  // Check if Tesseract is available
+  if(typeof Tesseract === 'undefined'){
+    throw new Error('Tesseract.js not loaded. Cannot perform OCR fallback.');
+  }
+
+  var worker = await Tesseract.createWorker('eng', 1, {
+    logger: m => {
+      if(m.status === 'recognizing text'){
+        ocrProg.style.width = (60 + m.progress * 20) + '%';
+      }
+    }
+  });
+
+  var allText = '';
+  for(var i=0; i<imagesArr.length; i++){
+    log('OCR page ' + (i+1) + '...');
+    var result = await worker.recognize(imagesArr[i]);
+    allText += '\n--- PAGE ' + (i+1) + ' ---\n' + result.data.text;
+  }
+  await worker.terminate();
+
+  log('OCR extracted ' + allText.length + ' characters');
+  ocrProg.style.width = '85%';
+
+  // Build prompt with OCR text
+  var qText = ws.sections.map(function(sec){
+    return sec.title + '\n' + sec.qs.map(function(q){
+      return 'Q' + q.n + ' [' + q.marks + ' marks]: ' + q.text.replace(/<[^>]+>/g, '');
+    }).join('\n');
+  }).join('\n\n');
+
+  var prompt = 'You are a CBSE Class 12 Mathematics teacher checking a handwritten worksheet.\n\n' +
+    'WORKSHEET: ' + ws.name + ' | MAX MARKS: ' + ws.max + '\n\n' +
+    'QUESTIONS:\n' + qText + '\n\n' +
+    'STUDENT ANSWERS (OCR extracted, may have errors):\n' + allText + '\n\n' +
+    'Please evaluate generously considering OCR may have errors. Award partial marks for attempts.\n' +
+    'Respond in JSON: {\"marks\": number, \"feedback\": "\", \"strength\": "\", \"improve\": "\"}';
+
+  log('Sending OCR text to Groq text model...');
+
+  var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + GROQ_API_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{role: 'user', content: prompt}],
+      temperature: 0.3,
+      max_tokens: 800
+    })
+  });
+
+  if(!response.ok){
+    throw new Error('Fallback API error: ' + response.statusText);
+  }
+
+  var data = await response.json();
+  var aiResponse = data.choices[0].message.content;
+
+  var jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+  var result;
+  if(jsonMatch){
+    result = JSON.parse(jsonMatch[0]);
+  } else {
+    throw new Error('Invalid JSON in fallback');
+  }
+
+  result.marks = Math.max(0, Math.min(ws.max, Math.round(Number(result.marks) || 0)));
+  result.feedback = result.feedback || 'Good effort!';
+  result.strength = result.strength || 'Attempted worksheet';
+  result.improve = result.improve || 'Practice more';
+
+  log('Fallback analysis complete! Marks: ' + result.marks + '/' + ws.max);
+
+  saveAndShowResult(result, wsIdx, ws, imagesArr, allText.substring(0, 2000));
 }
 
 function saveAndShowResult(result, wsIdx, ws, imagesArr, allText){
@@ -916,6 +1068,15 @@ function saveAndShowResult(result, wsIdx, ws, imagesArr, allText){
 }
 
 // Local fallback analyzer (when Groq API is not available)
+// Pre-check function to verify system readiness
+function checkSystemReady(){
+  var checks = [];
+  checks.push('Tesseract.js: ' + (typeof Tesseract !== 'undefined' ? '✅ Loaded' : '❌ Not loaded'));
+  checks.push('LocalStorage: ' + (typeof Storage !== 'undefined' ? '✅ Available' : '❌ Not available'));
+  checks.push('Groq API Key: ' + (localStorage.getItem('groq_api_key') ? '✅ Set' : '❌ Not set'));
+  return checks;
+}
+
 function analyzeWorksheetLocal(ws, ocrText){
   var text = ocrText.toLowerCase();
   var totalMarks = 0;
