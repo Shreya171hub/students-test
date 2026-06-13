@@ -193,6 +193,9 @@ tr:hover td{background:rgba(255,255,255,0.015)}
   .ws-options{grid-template-columns:1fr}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/groq-sdk@0.3.0/dist/groq-sdk.umd.min.js"></script>
+<base target="_blank">
 </head>
 <body>
 
@@ -377,10 +380,39 @@ tr:hover td{background:rgba(255,255,255,0.015)}
       <button class="tab-btn active" onclick="switchTab('submissions',this)">📥 Submissions</button>
       <button class="tab-btn" onclick="switchTab('marks-table',this)">📊 Marks Table</button>
       <button class="tab-btn" onclick="switchTab('analysis',this)">📈 Analysis</button>
+      <button class="tab-btn" onclick="switchTab('settings',this)">⚙️ AI Settings</button>
     </div>
     <div class="tab-content active" id="dtab-submissions"><div id="subList"></div></div>
     <div class="tab-content" id="dtab-marks-table"><div class="tbl-wrap"><table id="marksTable"><thead></thead><tbody></tbody></table></div></div>
     <div class="tab-content" id="dtab-analysis"><div id="analysisDiv"></div></div>
+    <div class="tab-content" id="dtab-settings">
+      <div class="sub-card">
+        <h3 style="margin-bottom:1rem;font-size:16px">🤖 AI Grading Settings</h3>
+        <div class="alert alert-info" style="margin-bottom:1rem">
+          <b>Free AI Grading with Groq API</b><br>
+          Get a free API key from <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent)">console.groq.com/keys</a> (no credit card required).<br>
+          This enables Llama 3.3 70B AI to evaluate student worksheets with much better accuracy than local analysis.
+        </div>
+        <div class="form-group">
+          <label>Groq API Key</label>
+          <input type="password" id="groqApiKey" placeholder="gsk_..." style="font-family:var(--mono)">
+        </div>
+        <div style="display:flex;gap:10px;margin-bottom:1rem">
+          <button class="btn btn-primary btn-sm" onclick="saveGroqKey()" style="margin-top:0">💾 Save Key</button>
+          <button class="btn btn-secondary btn-sm" onclick="testGroqKey()" style="margin-top:0">🧪 Test Connection</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearGroqKey()" style="margin-top:0">🗑️ Clear Key</button>
+        </div>
+        <div id="groqStatus"></div>
+        <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+          <div style="font-size:12px;color:var(--muted);line-height:1.6">
+            <b>Current Status:</b> <span id="groqCurrentStatus">Checking...</span><br>
+            <b>Model:</b> llama-3.3-70b-versatile<br>
+            <b>Free tier limits:</b> 30 requests/min, 14,400 requests/day<br>
+            <b>Accuracy:</b> Much better than local keyword matching
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -694,94 +726,324 @@ function submitWs(){
   if(!APP.selectedImages||APP.selectedImages.length===0){el.innerHTML='<div class="alert alert-error">⚠ Please upload at least one photo of your completed worksheet</div>';return;}
   var wsIdx=APP.currentWsIdx;
   var ws=WORKSHEETS[wsIdx];
-  if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
-  APP.records[APP.currentStudent][wsIdx]={
-    submitted:true,marks:null,maxMarks:ws.max,images:APP.selectedImages,
-    timestamp:new Date().toISOString(),aiChecked:false,pending:true
-  };
-  var ok=saveState();
-  if(ok){
-    document.getElementById('resEmoji').textContent='✅';
-    document.getElementById('resScore').textContent='Submitted!';
-    document.getElementById('resLabel').textContent=ws.name+' — '+APP.selectedImages.length+' page(s) uploaded';
-    document.getElementById('resFeedback').innerHTML='<div class="alert alert-success">Your worksheet has been received successfully. Nitin Kumar Sir will check it and update your marks soon. Check back on your dashboard later.</div>';
-  }else{
-    document.getElementById('resEmoji').textContent='⚠';
-    document.getElementById('resScore').textContent='Failed!';
-    document.getElementById('resLabel').textContent='Submission could not be saved';
-    document.getElementById('resFeedback').innerHTML='<div class="alert alert-error">Your worksheet could NOT be saved due to storage issues. Please try again with fewer/smaller photos, or inform Sir.</div>';
-  }
-  gotoPage('page-result');
+
+  // Show OCR overlay and start AI checking
+  document.getElementById('ocrOverlay').classList.add('open');
+  document.getElementById('ocrStatus').textContent='Initializing AI checker...';
+  document.getElementById('ocrProg').style.width='5%';
+  document.getElementById('ocrLog').innerHTML='';
+
+  // Start the AI checking process
+  runAI(wsIdx, ws, APP.selectedImages);
 }
 
 // ══════════════════════════════════════
 // AI CHECKING
 // ══════════════════════════════════════
 async function runAI(wsIdx,ws,imagesArr){
-  var msgs=['Reading your handwriting...','Checking page '+imagesArr.length+' page(s)...','Applying CBSE step-marking...','Writing personalised feedback...'];
-  var prog=document.getElementById('checkProg');
-  var msgEl=document.getElementById('checkMsg');
-  var step=0;
-  var iv=setInterval(function(){if(step<msgs.length){msgEl.textContent=msgs[step];prog.style.width=(25*(step+1))+'%';step++;}},2000);
+  var ocrStatus = document.getElementById('ocrStatus');
+  var ocrProg = document.getElementById('ocrProg');
+  var ocrLog = document.getElementById('ocrLog');
+
+  function log(msg){
+    var div = document.createElement('div');
+    div.className = 'ocr-log-item';
+    div.textContent = '> ' + msg;
+    ocrLog.appendChild(div);
+    ocrLog.scrollTop = ocrLog.scrollHeight;
+  }
+
   try{
-    var qText=ws.sections.map(function(sec){
-      return sec.title+'\n'+sec.qs.map(function(q){return 'Q'+q.n+' ['+q.marks+'m]: '+q.text.replace(/<[^>]+>/g,'');}).join('\n');
+    // STEP 1: OCR with Tesseract.js (FREE, browser-based)
+    ocrStatus.textContent = 'Step 1/3: Reading handwriting from ' + imagesArr.length + ' page(s)...';
+    ocrProg.style.width = '10%';
+    log('Loading Tesseract OCR engine... (one-time download ~4MB)');
+
+    var worker = await Tesseract.createWorker('eng', 1, {
+      logger: m => {
+        if(m.status === 'recognizing text'){
+          ocrProg.style.width = (10 + m.progress * 25) + '%';
+        }
+      }
+    });
+
+    var allText = '';
+    for(var i=0; i<imagesArr.length; i++){
+      log('Reading page ' + (i+1) + ' of ' + imagesArr.length + '...');
+      var result = await worker.recognize(imagesArr[i]);
+      allText += '\n--- PAGE ' + (i+1) + ' ---\n' + result.data.text;
+    }
+    await worker.terminate();
+
+    log('OCR complete! Extracted ' + allText.length + ' characters.');
+    log('Sample: "' + allText.substring(0, 80).replace(/\s+/g, ' ') + '..."');
+
+    // STEP 2: AI Evaluation with Groq (FREE API, no credit card)
+    ocrStatus.textContent = 'Step 2/3: AI teacher evaluating your answers...';
+    ocrProg.style.width = '40%';
+    log('Sending to Groq AI for evaluation...');
+
+    // Build the prompt with worksheet questions and student answers
+    var qText = ws.sections.map(function(sec){
+      return sec.title + '\n' + sec.qs.map(function(q){
+        return 'Q' + q.n + ' [' + q.marks + ' marks]: ' + q.text.replace(/<[^>]+>/g, '');
+      }).join('\n');
     }).join('\n\n');
 
-    var prompt='You are a CBSE Class 12 Mathematics teacher checking a handwritten worksheet on MATRICES. The student has submitted '+imagesArr.length+' page(s) of their answer — review ALL pages together as one combined answer sheet.'+
-      '\n\nWorksheet: '+ws.name+' | Topic: '+ws.topic+' | Maximum Marks: '+ws.max+
-      '\n\nQuestions:\n'+qText+
-      '\n\nInstructions: Apply CBSE step-marking. Award partial marks for correct steps. Total marks must be 0 to '+ws.max+'. Be encouraging.'+
-      '\n\nRespond ONLY in valid JSON: {"marks":0,"feedback":"your feedback","strength":"what they did well","improve":"what to improve"}';
+    var prompt = 'You are Nitin Kumar Sir, a CBSE Class 12 Mathematics teacher. You are checking a student\'s handwritten worksheet on MATRICES.\n\n' +
+      'WORKSHEET: ' + ws.name + '\n' +
+      'TOPIC: ' + ws.topic + '\n' +
+      'MAXIMUM MARKS: ' + ws.max + '\n\n' +
+      'QUESTIONS:\n' + qText + '\n\n' +
+      'STUDENT\'S HANDWRITTEN ANSWERS (OCR extracted):\n' + allText + '\n\n' +
+      'INSTRUCTIONS:\n' +
+      '1. Evaluate each question the student attempted\n' +
+      '2. Apply CBSE step-marking: award partial marks for correct steps\n' +
+      '3. Check if matrix calculations are correct\n' +
+      '4. Look for proper working/steps shown\n' +
+      '5. Be encouraging but honest\n' +
+      '6. Total marks must be between 0 and ' + ws.max + '\n\n' +
+      'Respond ONLY in this JSON format:\n' +
+      '{\n' +
+      '  "marks": <number 0-' + ws.max + '>,\n' +
+      '  "feedback": "<2-3 sentences of overall feedback>",\n' +
+      '  "strength": "<what student did well>",\n' +
+      '  "improve": "<what to improve>",\n' +
+      '  "questionBreakdown": "<brief note on which questions were good/poor>"\n' +
+      '}';
 
-    var content=imagesArr.map(function(b64){
-      var imgData=b64.split(',')[1];
-      var mime=b64.split(';')[0].split(':')[1];
-      return {type:'image',source:{type:'base64',media_type:mime,data:imgData}};
+    // Call Groq API (FREE tier - no credit card needed!)
+    // Get API key from: https://console.groq.com/keys
+    var GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
+
+    if(!GROQ_API_KEY){
+      // Fallback to local analysis if no API key
+      log('No Groq API key found. Using local analysis...');
+      log('Tip: Add your free Groq API key in Teacher Dashboard for better accuracy!');
+      var result = analyzeWorksheetLocal(ws, allText);
+      saveAndShowResult(result, wsIdx, ws, imagesArr, allText);
+      return;
+    }
+
+    var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + GROQ_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',  // Excellent at math reasoning
+        messages: [{role: 'user', content: prompt}],
+        temperature: 0.3,  // Lower = more consistent grading
+        max_tokens: 800
+      })
     });
-    content.push({type:'text',text:prompt});
 
-    var reqBody={
-      model:'claude-sonnet-4-20250514',
-      max_tokens:800,
-      messages:[{role:'user',content:content}]
-    };
+    if(!response.ok){
+      var errorData = await response.json();
+      throw new Error('Groq API error: ' + (errorData.error?.message || response.statusText));
+    }
 
-    var res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(reqBody)
-    });
+    var data = await response.json();
+    var aiResponse = data.choices[0].message.content;
 
-    clearInterval(iv);
-    prog.style.width='100%';
-    var data=await res.json();
-    var rawText=data.content.filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
-    var cleaned=rawText.replace(/^[^{]*/,'').replace(/[^}]*$/,'');
-    var result=JSON.parse(cleaned);
-    result.marks=Math.max(0,Math.min(ws.max,Math.round(Number(result.marks)||0)));
-    if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
-    APP.records[APP.currentStudent][wsIdx]={
-      submitted:true,marks:result.marks,maxMarks:ws.max,
-      feedback:result.feedback||'Good effort!',
-      strength:result.strength||'Attempted the worksheet',
-      improve:result.improve||'Review the topic again',
-      images:imagesArr,timestamp:new Date().toISOString(),aiChecked:true
-    };
-    saveState();
-    showResult(result,ws);
+    // Parse JSON from AI response
+    var jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    var result;
+    if(jsonMatch){
+      result = JSON.parse(jsonMatch[0]);
+    } else {
+      throw new Error('AI did not return valid JSON');
+    }
+
+    // Validate and clamp marks
+    result.marks = Math.max(0, Math.min(ws.max, Math.round(Number(result.marks) || 0)));
+    result.feedback = result.feedback || 'Good effort on the worksheet!';
+    result.strength = result.strength || 'Attempted the worksheet';
+    result.improve = result.improve || 'Practice more matrix problems';
+
+    log('AI evaluation complete! Marks: ' + result.marks + '/' + ws.max);
+
+    saveAndShowResult(result, wsIdx, ws, imagesArr, allText);
+
   }catch(err){
-    clearInterval(iv);
-    console.error('AI check error:',err);
-    if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
-    APP.records[APP.currentStudent][wsIdx]={submitted:true,marks:0,maxMarks:ws.max,images:imagesArr,timestamp:new Date().toISOString(),aiChecked:false,pending:true,feedback:'AI auto-check was unavailable, so 0 marks awarded by default. Nitin Kumar Sir will review your photo(s) and update your marks shortly.'};
-    saveState();
-    document.getElementById('resEmoji').textContent='📋';
-    document.getElementById('resScore').textContent='0/'+ws.max;
-    document.getElementById('resLabel').textContent='Awaiting Sir\'s review';
-    document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">AI checking was unavailable, so 0 marks were recorded for now. Nitin Kumar Sir will review your worksheet photo(s) and update your marks soon.</div>';
-    setTimeout(function(){gotoPage('page-result');},400);
+    console.error('AI check error:', err);
+    log('Error: ' + err.message);
+    log('Falling back to local analysis...');
+
+    // Fallback to local analysis
+    try{
+      var result = analyzeWorksheetLocal(ws, allText || '');
+      saveAndShowResult(result, wsIdx, ws, imagesArr, allText || '');
+    }catch(fallbackErr){
+      // Ultimate fallback
+      if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
+      APP.records[APP.currentStudent][wsIdx]={
+        submitted:true,marks:0,maxMarks:ws.max,
+        images:imagesArr,timestamp:new Date().toISOString(),
+        aiChecked:false,pending:true,
+        feedback:'AI auto-check encountered an error. Nitin Kumar Sir will review your worksheet photo(s) and update your marks shortly.'
+      };
+      saveState();
+
+      document.getElementById('ocrOverlay').classList.remove('open');
+      document.getElementById('resEmoji').textContent='📋';
+      document.getElementById('resScore').textContent='0/'+ws.max;
+      document.getElementById('resLabel').textContent="Awaiting Sir's review";
+      document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">AI checking encountered an error, so 0 marks were recorded for now. Nitin Kumar Sir will review your worksheet photo(s) and update your marks soon.</div>';
+      setTimeout(function(){gotoPage('page-result');},400);
+    }
   }
+}
+
+function saveAndShowResult(result, wsIdx, ws, imagesArr, allText){
+  var ocrProg = document.getElementById('ocrProg');
+  ocrProg.style.width = '100%';
+
+  if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
+  APP.records[APP.currentStudent][wsIdx]={
+    submitted:true,marks:result.marks,maxMarks:ws.max,
+    feedback:result.feedback,
+    strength:result.strength,
+    improve:result.improve,
+    images:imagesArr,timestamp:new Date().toISOString(),aiChecked:true,
+    ocrText: allText.substring(0, 2000)
+  };
+  saveState();
+
+  document.getElementById('ocrOverlay').classList.remove('open');
+  showResult(result, ws);
+}
+
+// Local fallback analyzer (when Groq API is not available)
+function analyzeWorksheetLocal(ws, ocrText){
+  var text = ocrText.toLowerCase();
+  var totalMarks = 0;
+  var maxMarks = ws.max;
+  var strengths = [];
+  var improvements = [];
+  var questionsAttempted = 0;
+  var questionsCorrect = 0;
+
+  ws.sections.forEach(function(sec){
+    sec.qs.forEach(function(q){
+      var qText = q.text.toLowerCase().replace(/<[^>]+>/g, '');
+      var qNum = q.n;
+      var qMarks = q.marks;
+
+      var qFound = text.includes(qNum + '.') || text.includes('q' + qNum) || text.includes('question ' + qNum) || 
+                   text.includes('(' + qNum + ')') || text.includes(qNum + ')');
+
+      if(qFound){
+        questionsAttempted++;
+        var keywords = extractKeywords(qText);
+        var keywordScore = 0;
+        var matchedKeywords = [];
+        keywords.forEach(function(kw){
+          if(text.includes(kw)){ keywordScore++; matchedKeywords.push(kw); }
+        });
+
+        var awarded = 0;
+        if(keywordScore >= keywords.length * 0.6){
+          awarded = Math.round(qMarks * 0.8);
+          questionsCorrect++;
+        } else if(keywordScore >= keywords.length * 0.3){
+          awarded = Math.round(qMarks * 0.5);
+        } else {
+          awarded = Math.round(qMarks * 0.2);
+        }
+
+        totalMarks += awarded;
+
+        if(awarded >= qMarks * 0.7){
+          strengths.push('Q' + qNum + ' answered well');
+        } else if(awarded < qMarks * 0.4){
+          improvements.push('Q' + qNum + ' needs more work (found: ' + matchedKeywords.join(', ') + ')');
+        }
+      } else {
+        improvements.push('Q' + qNum + ' not found in answer sheet');
+      }
+    });
+  });
+
+  totalMarks = Math.max(0, Math.min(maxMarks, totalMarks));
+
+  var pct = Math.round(totalMarks / maxMarks * 100);
+  var feedback = '';
+
+  if(pct >= 80){
+    feedback = 'Excellent work! You have demonstrated strong understanding of matrices. Your answers show clear working and correct application of concepts. ';
+  } else if(pct >= 60){
+    feedback = 'Good effort! You understand the basic concepts but need to work on accuracy and completeness. Review the questions where you lost marks. ';
+  } else if(pct >= 40){
+    feedback = 'Fair attempt. You have started learning the concepts but need more practice. Focus on understanding the fundamental operations and properties of matrices. ';
+  } else {
+    feedback = 'Keep trying! Matrix concepts require practice. Review your textbook examples and try solving similar problems step by step. ';
+  }
+
+  feedback += 'You attempted ' + questionsAttempted + ' out of ' + countQuestions(ws) + ' questions. ';
+
+  if(questionsAttempted < countQuestions(ws)){
+    feedback += 'Try to attempt ALL questions for better marks. ';
+  }
+
+  feedback += 'Note: This is a local analysis. For more accurate AI grading, add a Groq API key in the Teacher Dashboard.';
+
+  var strengthText = strengths.length > 0 ? strengths.slice(0, 3).join('; ') : 'Attempted the worksheet';
+  var improveText = improvements.length > 0 ? improvements.slice(0, 3).join('; ') : 'Practice more problems';
+
+  return {
+    marks: totalMarks,
+    feedback: feedback,
+    strength: strengthText,
+    improve: improveText
+  };
+}
+
+function extractKeywords(qText){
+  var keywords = [];
+  var mathTerms = ['matrix', 'matrices', 'order', 'transpose', 'symmetric', 'skew', 'inverse', 'determinant', 
+    'identity', 'diagonal', 'scalar', 'addition', 'multiplication', 'element', 'row', 'column',
+    'equal', 'prove', 'show', 'find', 'calculate', 'verify', 'hence', 'solve', 'construct',
+    'express', 'using', 'hence', 'therefore', 'thus', 'so', 'a²', 'b²', 'x²', 'y²', 'z²',
+    'ab', 'ba', 'a+b', 'a-b', '2x', '3y', '4z', '5a', '6b', 'i+j', 'i-j', 'ij', 'ji'];
+
+  mathTerms.forEach(function(term){
+    if(qText.includes(term)) keywords.push(term);
+  });
+
+  // Extract matrix patterns like [[1,2],[3,4]]
+  var matrixPattern = /\[\[[\s\S]*?\]\]/g;
+  var matrices = qText.match(matrixPattern);
+  if(matrices){
+    matrices.forEach(function(m){
+      keywords.push(m.substring(0, 15).replace(/\s/g, ''));
+    });
+  }
+
+  // Extract numbers
+  var numbers = qText.match(/\d+/g);
+  if(numbers){
+    numbers.slice(0, 5).forEach(function(n){
+      keywords.push(n);
+    });
+  }
+
+  // Extract Greek letters and math symbols
+  var symbols = qText.match(/[αβγδθπσΣ∫√∞±×÷≤≥≠≈∝∂∇]/g);
+  if(symbols){
+    symbols.forEach(function(s){ keywords.push(s); });
+  }
+
+  return keywords.length > 0 ? keywords : ['matrix'];
+}
+
+function countQuestions(ws){
+  var count = 0;
+  ws.sections.forEach(function(sec){
+    count += sec.qs.length;
+  });
+  return count;
 }
 
 function showResult(result,ws){
@@ -808,6 +1070,7 @@ function teacherLogin(){
 }
 
 function renderTeacherDash(){
+  updateGroqStatus();
   var ts=0,pend=0,tPct=0,pN=0;
   APP.students.forEach(s=>{var rec=APP.records[s]||{};WORKSHEETS.forEach((ws,i)=>{var r=rec[i];if(r&&r.submitted){ts++;if(r.marks==null)pend++;else{tPct+=Math.round(r.marks/ws.max*100);pN++;}}});});
   document.getElementById('tTotal').textContent=APP.students.length;
@@ -953,6 +1216,51 @@ function saveStudents(){
 }
 
 function openLb(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+
+function saveGroqKey(){
+  var key = document.getElementById('groqApiKey').value.trim();
+  if(!key){alert('Please enter an API key');return;}
+  if(!key.startsWith('gsk_')){alert('Groq keys start with "gsk_". Please check your key.');return;}
+  localStorage.setItem('groq_api_key', key);
+  document.getElementById('groqStatus').innerHTML = '<div class="alert alert-success">✓ API key saved securely in browser</div>';
+  updateGroqStatus();
+}
+
+function testGroqKey(){
+  var key = localStorage.getItem('groq_api_key');
+  if(!key){alert('No API key saved. Please save a key first.');return;}
+
+  document.getElementById('groqStatus').innerHTML = '<div class="alert alert-info">Testing connection...</div>';
+
+  fetch('https://api.groq.com/openai/v1/models', {
+    headers: {'Authorization': 'Bearer ' + key}
+  }).then(function(res){
+    if(res.ok){
+      document.getElementById('groqStatus').innerHTML = '<div class="alert alert-success">✓ Connection successful! Groq AI is ready.</div>';
+    } else {
+      document.getElementById('groqStatus').innerHTML = '<div class="alert alert-error">✗ Invalid API key. Please check and try again.</div>';
+    }
+  }).catch(function(err){
+    document.getElementById('groqStatus').innerHTML = '<div class="alert alert-error">✗ Connection failed: ' + err.message + '</div>';
+  });
+}
+
+function clearGroqKey(){
+  localStorage.removeItem('groq_api_key');
+  document.getElementById('groqApiKey').value = '';
+  document.getElementById('groqStatus').innerHTML = '<div class="alert alert-warn">API key cleared. Local analysis will be used.</div>';
+  updateGroqStatus();
+}
+
+function updateGroqStatus(){
+  var key = localStorage.getItem('groq_api_key');
+  var status = key ? '✓ Active (AI grading enabled)' : '✗ Not configured (local analysis only)';
+  var el = document.getElementById('groqCurrentStatus');
+  if(el) el.textContent = status;
+
+  var input = document.getElementById('groqApiKey');
+  if(input && key) input.placeholder = 'Key saved (starts with gsk_...)';
+}
 
 function exportCSV(){
   var ws=WORKSHEETS;
