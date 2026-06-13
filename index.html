@@ -306,11 +306,12 @@ tr:hover td{background:rgba(255,255,255,0.015)}
     <div class="alert alert-info" style="font-size:12px;margin-bottom:1.2rem">📌 Solve the questions on paper → Take a <b>clear, well-lit</b> photo → Upload below</div>
     <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondragover="this.classList.add('dragover');event.preventDefault()" ondragleave="this.classList.remove('dragover')" ondrop="dropFile(event)">
       <div style="font-size:38px;margin-bottom:8px">📷</div>
-      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Tap to capture / upload photo</div>
-      <div style="font-size:12px;color:var(--muted)" id="uploadHint">Clear photo of your completed worksheet</div>
-      <img id="uploadPreview" class="upload-preview" alt="Preview">
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">Tap to capture / upload photo(s)</div>
+      <div style="font-size:12px;color:var(--muted)" id="uploadHint">You can select MULTIPLE pages — all pages of your answer</div>
     </div>
-    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none" onchange="previewFile(this)">
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none" onchange="previewFile(this)">
+    <div id="previewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem"></div>
+    <button class="btn btn-secondary" id="addMoreBtn" style="display:none;margin-bottom:1rem" onclick="document.getElementById('fileInput').click()">➕ Add more pages</button>
     <div id="uploadAlert"></div>
     <button class="btn btn-primary" onclick="submitWs()">Submit for AI Checking 🤖</button>
     <button class="btn btn-secondary" onclick="gotoPage('page-ws-view')">← View Questions Again</button>
@@ -564,36 +565,87 @@ function goUpload(){
   if(APP.currentWsIdx===null)return;
   var ws=WORKSHEETS[APP.currentWsIdx];
   document.getElementById('uploadWsName').textContent=ws.name;
-  APP.selectedB64=null;
-  document.getElementById('uploadPreview').style.display='none';
+  APP.selectedImages=[];
+  document.getElementById('previewGrid').innerHTML='';
   document.getElementById('uploadArea').classList.remove('has-file');
-  document.getElementById('uploadHint').textContent='Clear photo of your completed worksheet';
+  document.getElementById('uploadHint').textContent='You can select MULTIPLE pages — all pages of your answer';
   document.getElementById('uploadAlert').innerHTML='';
+  document.getElementById('addMoreBtn').style.display='none';
   document.getElementById('fileInput').value='';
   gotoPage('page-upload');
 }
 
 // ══════════════════════════════════════
-// FILE UPLOAD
+// FILE UPLOAD — supports multiple pages
 // ══════════════════════════════════════
+function renderPreviewGrid(){
+  var grid=document.getElementById('previewGrid');
+  grid.innerHTML='';
+  APP.selectedImages.forEach(function(img,idx){
+    var wrap=document.createElement('div');
+    wrap.style.position='relative';
+    wrap.style.border='1px solid var(--border)';
+    wrap.style.borderRadius='8px';
+    wrap.style.overflow='hidden';
+    var im=document.createElement('img');
+    im.src=img;
+    im.style.width='100%';
+    im.style.height='100px';
+    im.style.objectFit='cover';
+    im.style.display='block';
+    var badge=document.createElement('div');
+    badge.textContent='Page '+(idx+1);
+    badge.style.position='absolute';badge.style.top='4px';badge.style.left='4px';
+    badge.style.background='rgba(0,0,0,0.6)';badge.style.color='#fff';
+    badge.style.fontSize='10px';badge.style.padding='2px 6px';badge.style.borderRadius='4px';
+    var del=document.createElement('div');
+    del.textContent='✕';
+    del.style.position='absolute';del.style.top='4px';del.style.right='4px';
+    del.style.background='rgba(239,68,68,0.85)';del.style.color='#fff';
+    del.style.fontSize='12px';del.style.width='20px';del.style.height='20px';
+    del.style.borderRadius='50%';del.style.display='flex';del.style.alignItems='center';
+    del.style.justifyContent='center';del.style.cursor='pointer';
+    del.onclick=function(ev){ev.stopPropagation();APP.selectedImages.splice(idx,1);renderPreviewGrid();};
+    wrap.appendChild(im);wrap.appendChild(badge);wrap.appendChild(del);
+    grid.appendChild(wrap);
+  });
+  var area=document.getElementById('uploadArea');
+  var addBtn=document.getElementById('addMoreBtn');
+  if(APP.selectedImages.length>0){
+    area.classList.add('has-file');
+    document.getElementById('uploadHint').textContent='✓ '+APP.selectedImages.length+' page(s) selected — tap below to add more';
+    addBtn.style.display='block';
+  }else{
+    area.classList.remove('has-file');
+    document.getElementById('uploadHint').textContent='You can select MULTIPLE pages — all pages of your answer';
+    addBtn.style.display='none';
+  }
+}
+
 function previewFile(input){
-  var file=input.files[0];if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    APP.selectedB64=e.target.result;
-    var prev=document.getElementById('uploadPreview');
-    prev.src=e.target.result;prev.style.display='block';
-    document.getElementById('uploadArea').classList.add('has-file');
-    document.getElementById('uploadHint').textContent='✓ '+file.name;
-  };
-  reader.readAsDataURL(file);
+  var files=input.files;if(!files||files.length===0)return;
+  if(!APP.selectedImages)APP.selectedImages=[];
+  var remaining=files.length;
+  Array.from(files).forEach(function(file){
+    if(!file.type.startsWith('image/')){remaining--;return;}
+    var reader=new FileReader();
+    reader.onload=function(e){
+      APP.selectedImages.push(e.target.result);
+      remaining--;
+      if(remaining<=0)renderPreviewGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+  // handle case all done synchronously is unlikely; ensure render after a tick too
+  setTimeout(renderPreviewGrid,300);
 }
 
 function dropFile(e){
   e.preventDefault();document.getElementById('uploadArea').classList.remove('dragover');
-  var file=e.dataTransfer.files[0];
-  if(file&&file.type.startsWith('image/')){
-    var dt=new DataTransfer();dt.items.add(file);
+  var files=e.dataTransfer.files;
+  if(files&&files.length>0){
+    var dt=new DataTransfer();
+    Array.from(files).forEach(function(f){dt.items.add(f);});
     document.getElementById('fileInput').files=dt.files;
     previewFile(document.getElementById('fileInput'));
   }
@@ -601,43 +653,42 @@ function dropFile(e){
 
 function submitWs(){
   var el=document.getElementById('uploadAlert');
-  if(!APP.selectedB64){el.innerHTML='<div class="alert alert-error">⚠ Please upload a photo of your completed worksheet</div>';return;}
+  if(!APP.selectedImages||APP.selectedImages.length===0){el.innerHTML='<div class="alert alert-error">⚠ Please upload at least one photo of your completed worksheet</div>';return;}
   gotoPage('page-checking');
-  runAI(APP.currentWsIdx,WORKSHEETS[APP.currentWsIdx],APP.selectedB64);
+  runAI(APP.currentWsIdx,WORKSHEETS[APP.currentWsIdx],APP.selectedImages);
 }
 
 // ══════════════════════════════════════
 // AI CHECKING
 // ══════════════════════════════════════
-async function runAI(wsIdx,ws,b64){
-  var msgs=['Reading your handwriting...','Checking each answer carefully...','Applying CBSE step-marking...','Writing personalised feedback...'];
+async function runAI(wsIdx,ws,imagesArr){
+  var msgs=['Reading your handwriting...','Checking page '+imagesArr.length+' page(s)...','Applying CBSE step-marking...','Writing personalised feedback...'];
   var prog=document.getElementById('checkProg');
   var msgEl=document.getElementById('checkMsg');
   var step=0;
   var iv=setInterval(function(){if(step<msgs.length){msgEl.textContent=msgs[step];prog.style.width=(25*(step+1))+'%';step++;}},2000);
   try{
-    var imgData=b64.split(',')[1];
-    var mime=b64.split(';')[0].split(':')[1];
     var qText=ws.sections.map(function(sec){
       return sec.title+'\n'+sec.qs.map(function(q){return 'Q'+q.n+' ['+q.marks+'m]: '+q.text.replace(/<[^>]+>/g,'');}).join('\n');
     }).join('\n\n');
 
-    var prompt='You are a CBSE Class 12 Mathematics teacher checking a handwritten worksheet on MATRICES.'+
+    var prompt='You are a CBSE Class 12 Mathematics teacher checking a handwritten worksheet on MATRICES. The student has submitted '+imagesArr.length+' page(s) of their answer — review ALL pages together as one combined answer sheet.'+
       '\n\nWorksheet: '+ws.name+' | Topic: '+ws.topic+' | Maximum Marks: '+ws.max+
       '\n\nQuestions:\n'+qText+
       '\n\nInstructions: Apply CBSE step-marking. Award partial marks for correct steps. Total marks must be 0 to '+ws.max+'. Be encouraging.'+
       '\n\nRespond ONLY in valid JSON: {"marks":0,"feedback":"your feedback","strength":"what they did well","improve":"what to improve"}';
 
+    var content=imagesArr.map(function(b64){
+      var imgData=b64.split(',')[1];
+      var mime=b64.split(';')[0].split(':')[1];
+      return {type:'image',source:{type:'base64',media_type:mime,data:imgData}};
+    });
+    content.push({type:'text',text:prompt});
+
     var reqBody={
       model:'claude-sonnet-4-20250514',
       max_tokens:800,
-      messages:[{
-        role:'user',
-        content:[
-          {type:'image',source:{type:'base64',media_type:mime,data:imgData}},
-          {type:'text',text:prompt}
-        ]
-      }]
+      messages:[{role:'user',content:content}]
     };
 
     var res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -659,7 +710,7 @@ async function runAI(wsIdx,ws,b64){
       feedback:result.feedback||'Good effort!',
       strength:result.strength||'Attempted the worksheet',
       improve:result.improve||'Review the topic again',
-      imageB64:b64,timestamp:new Date().toISOString(),aiChecked:true
+      images:imagesArr,timestamp:new Date().toISOString(),aiChecked:true
     };
     saveState();
     showResult(result,ws);
@@ -667,7 +718,7 @@ async function runAI(wsIdx,ws,b64){
     clearInterval(iv);
     console.error('AI check error:',err);
     if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
-    APP.records[APP.currentStudent][wsIdx]={submitted:true,marks:null,maxMarks:ws.max,imageB64:b64,timestamp:new Date().toISOString(),aiChecked:false,pending:true};
+    APP.records[APP.currentStudent][wsIdx]={submitted:true,marks:null,maxMarks:ws.max,images:imagesArr,timestamp:new Date().toISOString(),aiChecked:false,pending:true};
     saveState();
     document.getElementById('resEmoji').textContent='📋';
     document.getElementById('resScore').textContent='Saved!';
@@ -734,7 +785,13 @@ function renderSubs(){
       if(pct!=null)html+='<div style="font-size:28px;font-weight:700;color:'+col+'">'+r.marks+'/'+ws.max+'</div><div style="font-size:12px;color:var(--muted)">'+pct+'%</div>';
       else html+='<span class="badge badge-submitted">Not scored</span>';
       html+='</div></div>';
-      if(r.imageB64)html+='<img src="'+r.imageB64+'" class="sub-img" onclick="openLb(this.src)" alt="Worksheet photo">';
+      if(r.images&&r.images.length){
+        html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:10px 0">';
+        r.images.forEach(function(im,pi){
+          html+='<div style="position:relative"><img src="'+im+'" class="sub-img" style="max-height:160px;margin:0" onclick="openLb(this.src)" alt="Page '+(pi+1)+'"><div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px">Page '+(pi+1)+'</div></div>';
+        });
+        html+='</div>';
+      }else if(r.imageB64){html+='<img src="'+r.imageB64+'" class="sub-img" onclick="openLb(this.src)" alt="Worksheet photo">';}
       html+='<div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">';
       html+='<input type="number" min="0" max="'+ws.max+'" id="sc_'+s.replace(/\s/g,'_')+'_'+i+'" value="'+(r.marks!=null?r.marks:'')+'" placeholder="/'+ws.max+'" style="width:100px;font-family:var(--mono);font-weight:700;font-size:16px;text-align:center">';
       html+='<button class="btn btn-green btn-sm" onclick="saveScore(\''+s.replace(/'/g,"\\'")+'\',' +i+','+ws.max+')">💾 Save Score</button>';
