@@ -401,7 +401,31 @@ var APP={
 var TEACHER_PWD='9897060640';
 
 function loadState(){try{var d=localStorage.getItem('matrixV4');if(d){var s=JSON.parse(d);if(s.students&&s.students.length>0)APP.students=s.students;APP.phones=s.phones||{};APP.records=s.records||{};}}catch(e){}}
-function saveState(){try{localStorage.setItem('matrixV4',JSON.stringify({students:APP.students,phones:APP.phones,records:APP.records}));}catch(e){}}
+function saveState(){
+  try{
+    localStorage.setItem('matrixV4',JSON.stringify({students:APP.students,phones:APP.phones,records:APP.records}));
+    return true;
+  }catch(e){
+    console.error('saveState failed:',e);
+    // Try to free space by removing oldest images first (keep marks/feedback)
+    try{
+      var students=Object.keys(APP.records);
+      for(var s=0;s<students.length;s++){
+        var rec=APP.records[students[s]];
+        var wsKeys=Object.keys(rec);
+        for(var w=0;w<wsKeys.length;w++){
+          if(rec[wsKeys[w]].images){delete rec[wsKeys[w]].images;}
+        }
+      }
+      localStorage.setItem('matrixV4',JSON.stringify({students:APP.students,phones:APP.phones,records:APP.records}));
+      alert('⚠ Storage was full. Your marks/feedback are saved, but older worksheet photos were removed to make space. New submissions will still work.');
+      return true;
+    }catch(e2){
+      alert('⚠ ERROR: Could not save your submission — device storage is full. Please ask Sir for help, or try clearing some space and submit again.');
+      return false;
+    }
+  }
+}
 
 document.addEventListener('DOMContentLoaded',function(){loadState();populateDropdown();});
 
@@ -478,7 +502,7 @@ function renderDash(){
     var r=rec[i]||{};
     var status=r.marks!=null?'scored':r.submitted?'submitted':'pending';
     var bCls={'scored':'badge-scored','submitted':'badge-submitted','pending':'badge-pending'}[status];
-    var bTxt={'scored':r.marks+'/'+ws.max+' marks','submitted':'Submitted — awaiting score','pending':'Not yet submitted'}[status];
+    var bTxt={'scored':r.marks+'/'+ws.max+' marks','submitted':'Submitted — Sir will check soon','pending':'Not yet submitted'}[status];
     if(r.submitted)sub++;
     if(r.marks!=null){scored++;var p=Math.round(r.marks/ws.max*100);tPct+=p;pctN++;}
     var pct=r.marks!=null?Math.round(r.marks/ws.max*100):null;
@@ -622,22 +646,36 @@ function renderPreviewGrid(){
   }
 }
 
+function compressImage(dataUrl,maxW,quality,cb){
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width,h=img.height;
+    if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}
+    var canvas=document.createElement('canvas');
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL('image/jpeg',quality));
+  };
+  img.onerror=function(){cb(dataUrl);};
+  img.src=dataUrl;
+}
+
 function previewFile(input){
   var files=input.files;if(!files||files.length===0)return;
   if(!APP.selectedImages)APP.selectedImages=[];
   var remaining=files.length;
   Array.from(files).forEach(function(file){
-    if(!file.type.startsWith('image/')){remaining--;return;}
+    if(!file.type.startsWith('image/')){remaining--;if(remaining<=0)renderPreviewGrid();return;}
     var reader=new FileReader();
     reader.onload=function(e){
-      APP.selectedImages.push(e.target.result);
-      remaining--;
-      if(remaining<=0)renderPreviewGrid();
+      compressImage(e.target.result,1000,0.6,function(compressed){
+        APP.selectedImages.push(compressed);
+        remaining--;
+        if(remaining<=0)renderPreviewGrid();
+      });
     };
     reader.readAsDataURL(file);
   });
-  // handle case all done synchronously is unlikely; ensure render after a tick too
-  setTimeout(renderPreviewGrid,300);
 }
 
 function dropFile(e){
@@ -654,8 +692,26 @@ function dropFile(e){
 function submitWs(){
   var el=document.getElementById('uploadAlert');
   if(!APP.selectedImages||APP.selectedImages.length===0){el.innerHTML='<div class="alert alert-error">⚠ Please upload at least one photo of your completed worksheet</div>';return;}
-  gotoPage('page-checking');
-  runAI(APP.currentWsIdx,WORKSHEETS[APP.currentWsIdx],APP.selectedImages);
+  var wsIdx=APP.currentWsIdx;
+  var ws=WORKSHEETS[wsIdx];
+  if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
+  APP.records[APP.currentStudent][wsIdx]={
+    submitted:true,marks:null,maxMarks:ws.max,images:APP.selectedImages,
+    timestamp:new Date().toISOString(),aiChecked:false,pending:true
+  };
+  var ok=saveState();
+  if(ok){
+    document.getElementById('resEmoji').textContent='✅';
+    document.getElementById('resScore').textContent='Submitted!';
+    document.getElementById('resLabel').textContent=ws.name+' — '+APP.selectedImages.length+' page(s) uploaded';
+    document.getElementById('resFeedback').innerHTML='<div class="alert alert-success">Your worksheet has been received successfully. Nitin Kumar Sir will check it and update your marks soon. Check back on your dashboard later.</div>';
+  }else{
+    document.getElementById('resEmoji').textContent='⚠';
+    document.getElementById('resScore').textContent='Failed!';
+    document.getElementById('resLabel').textContent='Submission could not be saved';
+    document.getElementById('resFeedback').innerHTML='<div class="alert alert-error">Your worksheet could NOT be saved due to storage issues. Please try again with fewer/smaller photos, or inform Sir.</div>';
+  }
+  gotoPage('page-result');
 }
 
 // ══════════════════════════════════════
@@ -718,12 +774,12 @@ async function runAI(wsIdx,ws,imagesArr){
     clearInterval(iv);
     console.error('AI check error:',err);
     if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
-    APP.records[APP.currentStudent][wsIdx]={submitted:true,marks:null,maxMarks:ws.max,images:imagesArr,timestamp:new Date().toISOString(),aiChecked:false,pending:true};
+    APP.records[APP.currentStudent][wsIdx]={submitted:true,marks:0,maxMarks:ws.max,images:imagesArr,timestamp:new Date().toISOString(),aiChecked:false,pending:true,feedback:'AI auto-check was unavailable, so 0 marks awarded by default. Nitin Kumar Sir will review your photo(s) and update your marks shortly.'};
     saveState();
     document.getElementById('resEmoji').textContent='📋';
-    document.getElementById('resScore').textContent='Saved!';
-    document.getElementById('resLabel').textContent='Sir will check and add your marks soon';
-    document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">Your worksheet has been saved. Nitin Kumar Sir will review and add your marks.</div>';
+    document.getElementById('resScore').textContent='0/'+ws.max;
+    document.getElementById('resLabel').textContent='Awaiting Sir\'s review';
+    document.getElementById('resFeedback').innerHTML='<div class="alert alert-warn">AI checking was unavailable, so 0 marks were recorded for now. Nitin Kumar Sir will review your worksheet photo(s) and update your marks soon.</div>';
     setTimeout(function(){gotoPage('page-result');},400);
   }
 }
