@@ -745,20 +745,110 @@ function submitWs(){
   var wsIdx=APP.currentWsIdx;
   var ws=WORKSHEETS[wsIdx];
 
-  // Show OCR overlay and start AI checking
+  // Show OCR overlay
   document.getElementById('ocrOverlay').classList.add('open');
-  document.getElementById('ocrStatus').textContent='Initializing AI checker...';
+  document.getElementById('ocrStatus').textContent='Uploading photos to cloud storage...';
   document.getElementById('ocrProg').style.width='5%';
   document.getElementById('ocrLog').innerHTML='';
 
-  // Start the AI checking process
-  runAI(wsIdx, ws, APP.selectedImages);
+  // STEP 1: Upload images to ImgBB cloud
+  uploadAllImages(APP.selectedImages).then(function(uploadedUrls){
+    document.getElementById('ocrStatus').textContent='Photos uploaded! Starting AI analysis...';
+    document.getElementById('ocrProg').style.width='20%';
+
+    // Store the uploaded URLs for later use
+    APP.lastUploadedUrls = uploadedUrls;
+
+    // STEP 2: Start AI checking with uploaded URLs
+    // Pass both original images (for AI vision) and URLs (for storage)
+    runAI(wsIdx, ws, APP.selectedImages, uploadedUrls);
+  }).catch(function(err){
+    console.error('Upload failed:', err);
+    document.getElementById('ocrLog').innerHTML += '<div class="ocr-log-item" style="color:var(--red)">Upload warning: ' + err.message + '</div>';
+    document.getElementById('ocrLog').innerHTML += '<div class="ocr-log-item">Continuing with local storage...</div>';
+
+    // Continue with local images if upload fails
+    APP.lastUploadedUrls = APP.selectedImages.map(function(img){return {url: img, local_only: true};});
+    runAI(wsIdx, ws, APP.selectedImages, APP.lastUploadedUrls);
+  });
 }
 
 // ══════════════════════════════════════
 // AI CHECKING
 // ══════════════════════════════════════
-async function runAI(wsIdx,ws,imagesArr){
+// ══════════════════════════════════════
+// IMGBB CLOUD UPLOAD - Stores photos permanently
+// ══════════════════════════════════════
+
+// HARDCODED ImgBB API KEY - for classroom use
+// Get your free key at: https://api.imgbb.com/
+// Free tier: 32MB per image, generous rate limits
+var IMGBB_API_KEY = '2793fde9a60463515ac753061cf66384'; // Your real ImgBB API key
+
+async function uploadImageToImgBB(base64Image, filename){
+  console.log('Uploading to ImgBB...');
+
+  // Remove the data:image/jpeg;base64, prefix if present
+  var base64Data = base64Image;
+  if(base64Data.includes(',')){
+    base64Data = base64Data.split(',')[1];
+  }
+
+  // Create form data
+  var formData = new FormData();
+  formData.append('image', base64Data);
+  if(filename) formData.append('name', filename);
+
+  try{
+    var response = await fetch('https://api.imgbb.com/1/upload?key=' + IMGBB_API_KEY, {
+      method: 'POST',
+      body: formData
+    });
+
+    if(!response.ok){
+      var errorText = await response.text();
+      console.error('ImgBB upload failed:', errorText);
+      throw new Error('ImgBB upload failed: ' + response.statusText);
+    }
+
+    var data = await response.json();
+    console.log('ImgBB response:', data);
+
+    if(data.success){
+      return {
+        url: data.data.url,
+        display_url: data.data.display_url,
+        thumb_url: data.data.thumb ? data.data.thumb.url : data.data.display_url,
+        delete_url: data.data.delete_url,
+        width: data.data.width,
+        height: data.data.height,
+        size: data.data.size
+      };
+    } else {
+      throw new Error('ImgBB returned error: ' + (data.error ? data.error.message : 'Unknown'));
+    }
+  }catch(err){
+    console.error('ImgBB upload error:', err);
+    throw err;
+  }
+}
+
+async function uploadAllImages(imagesArr){
+  var uploadedUrls = [];
+  for(var i=0; i<imagesArr.length; i++){
+    try{
+      var result = await uploadImageToImgBB(imagesArr[i], 'worksheet_page_' + (i+1));
+      uploadedUrls.push(result);
+    }catch(err){
+      console.error('Failed to upload page ' + (i+1) + ':', err);
+      // Fallback: keep the base64 for local storage
+      uploadedUrls.push({url: imagesArr[i], local_only: true});
+    }
+  }
+  return uploadedUrls;
+}
+
+async function runAI(wsIdx,ws,imagesArr,uploadedUrls){
   console.log('=== runAI STARTED (Vision Mode) ===', {wsIdx, wsName: ws.name, imageCount: imagesArr.length});
 
   var ocrStatus = document.getElementById('ocrStatus');
@@ -1064,14 +1154,27 @@ function saveAndShowResult(result, wsIdx, ws, imagesArr, allText){
   var ocrProg = document.getElementById('ocrProg');
   ocrProg.style.width = '100%';
 
+  // Use uploaded URLs if available, otherwise use base64
+  var storedImages = APP.lastUploadedUrls || imagesArr;
+
+  // If images are uploaded URLs, store just the URLs (tiny size)
+  // If local only, store base64 (but warn about storage)
+  var imagesToStore = storedImages.map(function(img){
+    if(img.url && !img.local_only){
+      return {url: img.url, thumb: img.thumb_url, width: img.width, height: img.height, cloud: true};
+    } else {
+      return img.url || img; // base64 string
+    }
+  });
+
   if(!APP.records[APP.currentStudent])APP.records[APP.currentStudent]={};
   APP.records[APP.currentStudent][wsIdx]={
     submitted:true,marks:result.marks,maxMarks:ws.max,
     feedback:result.feedback,
     strength:result.strength,
     improve:result.improve,
-    images:imagesArr,timestamp:new Date().toISOString(),aiChecked:true,
-    ocrText: allText.substring(0, 2000)
+    images:imagesToStore,timestamp:new Date().toISOString(),aiChecked:true,
+    ocrText: (typeof allText === 'string' ? allText.substring(0, 2000) : 'Vision analysis completed')
   };
   saveState();
 
@@ -1280,7 +1383,11 @@ function renderSubs(){
       if(r.images&&r.images.length){
         html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:10px 0">';
         r.images.forEach(function(im,pi){
-          html+='<div style="position:relative"><img src="'+im+'" class="sub-img" style="max-height:160px;margin:0" onclick="openLb(this.src)" alt="Page '+(pi+1)+'"><div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px">Page '+(pi+1)+'</div></div>';
+          var imgSrc = (typeof im === 'object' && im.url) ? im.url : im;
+          var isCloud = (typeof im === 'object' && im.cloud);
+          html+='<div style="position:relative"><img src="'+imgSrc+'" class="sub-img" style="max-height:160px;margin:0" onclick="openLb(this.src)" alt="Page '+(pi+1)+'">';
+          if(isCloud) html+='<div style="position:absolute;top:4px;right:4px;background:rgba(16,185,129,0.85);color:#fff;font-size:9px;padding:2px 6px;border-radius:4px">☁️ Cloud</div>';
+          html+='<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:2px 6px;border-radius:4px">Page '+(pi+1)+'</div></div>';
         });
         html+='</div>';
       }else if(r.imageB64){html+='<img src="'+r.imageB64+'" class="sub-img" onclick="openLb(this.src)" alt="Worksheet photo">';}
@@ -1388,7 +1495,12 @@ function saveStudents(){
   renderTeacherDash();alert('✓ '+names.length+' students saved!');
 }
 
-function openLb(src){document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
+function openLb(src){
+  // Handle object URLs (cloud storage objects)
+  var imgSrc = (typeof src === 'object' && src.url) ? src.url : src;
+  document.getElementById('lightboxImg').src=imgSrc;
+  document.getElementById('lightbox').classList.add('open');
+}
 
 function saveGroqKey(){
   var key = document.getElementById('groqApiKey').value.trim();
