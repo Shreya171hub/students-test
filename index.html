@@ -779,7 +779,13 @@ async function runAI(wsIdx,ws,imagesArr){
     ocrProg.style.width = '10%';
     log('Starting AI vision analysis...');
 
-    var GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
+    // HARDCODED API KEY - for classroom use without per-device setup
+    // WARNING: Anyone with access to this page source can see this key.
+    // If you suspect misuse, regenerate the key at https://console.groq.com/keys
+    var HARDCODED_GROQ_KEY = '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';
+
+    // Priority: 1) localStorage (if teacher added custom key), 2) Hardcoded key
+    var GROQ_API_KEY = localStorage.getItem('groq_api_key') || HARDCODED_GROQ_KEY || '';
     console.log('Groq API key present:', GROQ_API_KEY ? 'YES' : 'NO');
 
     if(!GROQ_API_KEY){
@@ -915,7 +921,13 @@ async function runAI(wsIdx,ws,imagesArr){
 
     // Try fallback
     try{
-      var GROQ_API_KEY = localStorage.getItem('groq_api_key') || '';
+      // HARDCODED API KEY - for classroom use without per-device setup
+    // WARNING: Anyone with access to this page source can see this key.
+    // If you suspect misuse, regenerate the key at https://console.groq.com/keys
+    var HARDCODED_GROQ_KEY = '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';
+
+    // Priority: 1) localStorage (if teacher added custom key), 2) Hardcoded key
+    var GROQ_API_KEY = localStorage.getItem('groq_api_key') || HARDCODED_GROQ_KEY || '';
       if(GROQ_API_KEY){
         log('Trying fallback text-based analysis...');
         await fallbackTextAnalysis(wsIdx, ws, imagesArr, GROQ_API_KEY);
@@ -1388,8 +1400,9 @@ function saveGroqKey(){
 }
 
 function testGroqKey(){
-  var key = localStorage.getItem('groq_api_key');
-  if(!key){alert('No API key saved. Please save a key first.');return;}
+  var HARDCODED_GROQ_KEY = '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';
+  var key = localStorage.getItem('groq_api_key') || HARDCODED_GROQ_KEY;
+  if(!key){alert('No API key available. Please save a key first.');return;}
 
   document.getElementById('groqStatus').innerHTML = '<div class="alert alert-info">Testing connection...</div>';
 
@@ -1414,7 +1427,8 @@ function clearGroqKey(){
 }
 
 function updateGroqStatus(){
-  var key = localStorage.getItem('groq_api_key');
+  var HARDCODED_GROQ_KEY = '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';
+  var key = localStorage.getItem('groq_api_key') || HARDCODED_GROQ_KEY;
   var status = key ? '✓ Active (AI grading enabled)' : '✗ Not configured (local analysis only)';
   var el = document.getElementById('groqCurrentStatus');
   if(el) el.textContent = status;
