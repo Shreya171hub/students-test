@@ -1,156 +1,639 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Class 6 English — A Bottle of Dew</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Merriweather:ital,wght@0,700;1,400&display=swap');
-    :root{--green:#2E7D32;--green-light:#E8F5E9;--gold:#F9A825;--gold-light:#FFFDE7;--red:#C62828;--ink:#1A1A2E;--muted:#546E7A;--bg:#F5F7FA;--white:#FFFFFF;--radius:12px;}
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
-    header{background:linear-gradient(135deg,#1B5E20 0%,#2E7D32 60%,#388E3C 100%);color:white;padding:28px 20px 24px;text-align:center;position:relative;overflow:hidden;}
-    header::before{content:"📖";position:absolute;font-size:120px;opacity:0.08;top:-10px;left:-10px;}
-    header::after{content:"💧";position:absolute;font-size:100px;opacity:0.08;bottom:-20px;right:10px;}
-    .school-name{font-size:13px;letter-spacing:2px;text-transform:uppercase;opacity:0.85;margin-bottom:6px;}
-    header h1{font-family:'Merriweather',serif;font-size:22px;line-height:1.3;margin-bottom:4px;}
-    header .subtitle{font-size:13px;opacity:0.8;margin-top:6px;}
-    .badge-row{display:flex;justify-content:center;gap:10px;margin-top:14px;flex-wrap:wrap;}
-    .badge{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:600;}
-    .info-card{background:white;margin:18px 16px;border-radius:var(--radius);padding:16px;box-shadow:0 2px 10px rgba(0,0,0,0.07);display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .info-field label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin-bottom:4px;}
-    .info-field input{width:100%;border:none;border-bottom:2px solid #CFD8DC;padding:4px 2px;font-family:'Nunito',sans-serif;font-size:14px;color:var(--ink);background:transparent;outline:none;}
-    .section-header{display:flex;align-items:center;gap:10px;margin:22px 16px 12px;}
-    .section-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-    .section-icon.mcq{background:#E3F2FD;}.section-icon.fill{background:#FFF3E0;}.section-icon.tf{background:#F3E5F5;}
-    .section-title{font-size:16px;font-weight:800;color:var(--ink);}
-    .section-marks{font-size:11px;color:var(--muted);font-weight:600;}
-    .q-card{background:white;margin:0 16px 12px;border-radius:var(--radius);padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #CFD8DC;transition:border-color 0.3s;}
-    .q-card.correct{border-left-color:var(--green);background:var(--green-light);}
-    .q-card.incorrect{border-left-color:var(--red);background:#FFEBEE;}
-    .q-num{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
-    .q-text{font-size:15px;font-weight:600;line-height:1.5;margin-bottom:12px;}
-    .options{display:flex;flex-direction:column;gap:8px;}
-    .option{display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid #ECEFF1;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;}
-    .option input[type="radio"]{accent-color:var(--green);width:16px;height:16px;}
-    .option.selected-correct{border-color:var(--green);background:var(--green-light);color:var(--green);}
-    .option.selected-wrong{border-color:var(--red);background:#FFEBEE;color:var(--red);}
-    .option.show-correct{border-color:var(--green);background:var(--green-light);}
-    .fill-input{border:none;border-bottom:2px dashed #90A4AE;padding:3px 8px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--ink);background:transparent;outline:none;min-width:120px;text-align:center;}
-    .fill-input.correct-ans{border-bottom-color:var(--green);color:var(--green);}
-    .fill-input.wrong-ans{border-bottom-color:var(--red);color:var(--red);}
-    .tf-options{display:flex;gap:10px;}
-    .tf-btn{flex:1;padding:10px;border:2px solid #ECEFF1;border-radius:8px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;background:white;}
-    .tf-btn.selected-correct{border-color:var(--green);background:var(--green-light);color:var(--green);}
-    .tf-btn.selected-wrong{border-color:var(--red);background:#FFEBEE;color:var(--red);}
-    .tf-btn.show-correct{border-color:var(--green);background:var(--green-light);}
-    .feedback{display:none;margin-top:10px;font-size:13px;font-weight:700;padding:6px 10px;border-radius:6px;}
-    .feedback.correct-fb{display:block;color:var(--green);background:#C8E6C9;}
-    .feedback.incorrect-fb{display:block;color:var(--red);background:#FFCDD2;}
-    .submit-wrap{padding:20px 16px;text-align:center;}
-    .submit-btn{background:linear-gradient(135deg,#2E7D32,#388E3C);color:white;border:none;border-radius:30px;padding:14px 40px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(46,125,50,0.35);}
-    #result-card{display:none;margin:0 16px 24px;border-radius:var(--radius);padding:24px 20px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,0.1);}
-    #result-card.pass{background:var(--green-light);border:2px solid var(--green);}
-    #result-card.fail{background:#FFEBEE;border:2px solid var(--red);}
-    .result-emoji{font-size:48px;margin-bottom:8px;}
-    .result-score{font-size:32px;font-weight:800;margin-bottom:4px;}
-    .result-msg{font-size:14px;color:var(--muted);margin-bottom:14px;}
-    .retry-btn{background:white;border:2px solid var(--green);color:var(--green);border-radius:20px;padding:8px 24px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
-    footer{text-align:center;padding:16px;font-size:12px;color:var(--muted);}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter Practice Quiz</title>
+<style>
+  :root {
+    --paper: #FBF7EE;
+    --ink: #2B2620;
+    --rule: #D8CBB0;
+    --moss: #3F6B4F;
+    --moss-dark: #2E4F39;
+    --clay: #B5562D;
+    --gold: #C8932B;
+    --card: #FFFFFF;
+    --wrong: #B5562D;
+    --right: #3F6B4F;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  header.top {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  header.top .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: var(--clay);
+    font-weight: 600;
+  }
+
+  header.top h1 {
+    font-size: 32px;
+    margin: 8px 0 6px;
+    font-weight: 700;
+  }
+
+  header.top p {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    color: #6b6254;
+    margin: 0;
+  }
+
+  .progress-bar {
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    padding: 10px 0 14px;
+    z-index: 10;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 24px;
+  }
+
+  .progress-track {
+    height: 6px;
+    background: var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--moss);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: #6b6254;
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  .chapter {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+
+  .chapter-head {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 18px 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .chapter-head .num {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--clay);
+    font-weight: 700;
+  }
+
+  .chapter-head h2 {
+    font-size: 19px;
+    margin: 2px 0 0;
+  }
+
+  .chapter-head .chevron {
+    font-size: 18px;
+    color: var(--moss);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .chapter.open .chevron { transform: rotate(180deg); }
+
+  .chapter-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .chapter.open .chapter-body {
+    max-height: none;
+  }
+
+  .chapter-inner {
+    padding: 0 22px 24px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .section-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--moss-dark);
+    font-weight: 700;
+    margin: 26px 0 12px;
+    padding-top: 4px;
+  }
+
+  .q {
+    margin-bottom: 18px;
+  }
+
+  .q-text {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .q-text .qn {
+    color: var(--clay);
+    font-weight: 700;
+    margin-right: 4px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .opt {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    text-align: left;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 14.5px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .opt:hover { border-color: var(--moss); }
+
+  .opt.selected-correct {
+    background: #E7F0E5;
+    border-color: var(--right);
+    color: var(--moss-dark);
+    font-weight: 600;
+  }
+
+  .opt.selected-wrong {
+    background: #F6E6DD;
+    border-color: var(--wrong);
+    color: var(--clay);
+  }
+
+  .opt.reveal-correct {
+    border-color: var(--right);
+    border-style: dashed;
+  }
+
+  .opt:disabled { cursor: default; }
+
+  /* Fill in the blank */
+  .fib-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 16px;
+  }
+
+  .fib-row input {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    border: none;
+    border-bottom: 2px solid var(--gold);
+    background: transparent;
+    font-size: 15px;
+    padding: 3px 4px;
+    width: 160px;
+    color: var(--ink);
+  }
+
+  .fib-row input:focus { outline: none; border-bottom-color: var(--clay); }
+
+  .fib-row input.fib-correct { border-bottom-color: var(--right); color: var(--moss-dark); }
+  .fib-row input.fib-wrong { border-bottom-color: var(--wrong); color: var(--clay); }
+
+  .fib-check, .tf-check {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    border: 1px solid var(--moss);
+    color: var(--moss-dark);
+    background: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .fib-check:hover, .tf-check:hover { background: #E7F0E5; }
+
+  .fib-answer {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    color: var(--moss-dark);
+    margin-left: 4px;
+  }
+
+  /* True/False */
+  .tf-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tf-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .tf-btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .tf-btn.tf-selected-correct { background: #E7F0E5; border-color: var(--right); color: var(--moss-dark); font-weight: 600; }
+  .tf-btn.tf-selected-wrong { background: #F6E6DD; border-color: var(--wrong); color: var(--clay); }
+  .tf-btn.tf-reveal { border-color: var(--right); border-style: dashed; }
+
+  .chapter-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--rule);
+  }
+
+  .score-pill {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    color: var(--moss-dark);
+    background: #E7F0E5;
+    border-radius: 20px;
+    padding: 6px 14px;
+  }
+
+  .reset-btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    background: none;
+    border: 1px solid var(--rule);
+    color: #6b6254;
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+
+  .reset-btn:hover { border-color: var(--clay); color: var(--clay); }
+
+  footer.page-footer {
+    text-align: center;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: #9c9384;
+    margin-top: 40px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
 </head>
 <body>
-<header>
-  <div class="school-name">Bal Vidya Mandir Sr. Sec. School, Sambhal</div>
-  <h1>A Bottle of Dew</h1>
-  <div class="subtitle">Chapter 1 · NCERT Poorvi · Class VI English</div>
-  <div class="badge-row">
-    <span class="badge">📝 15 Questions</span>
-    <span class="badge">⏱ 20 Minutes</span>
-    <span class="badge">⭐ 15 Marks</span>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">English Reader · Practice Worksheet</div>
+    <h1>Chapter Practice Quiz</h1>
+    <p>Tap a chapter to begin. Tap an option to answer — it checks itself.</p>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 of 0 answered</div>
   </div>
-</header>
-<div class="info-card">
-  <div class="info-field"><label>Student Name</label><input type="text" id="stu-name" placeholder="Your full name"/></div>
-  <div class="info-field"><label>Roll Number</label><input type="text" id="stu-roll" placeholder="Roll no."/></div>
-  <div class="info-field"><label>Section</label><input type="text" id="stu-sec" placeholder="A / B / C"/></div>
-  <div class="info-field"><label>Date</label><input type="text" id="stu-date" placeholder="DD/MM/YYYY"/></div>
+
+  <div id="chapters"></div>
+
+  <footer class="page-footer">Practice worksheet · 3 chapters</footer>
 </div>
-<div class="section-header"><div class="section-icon mcq">🔵</div><div><div class="section-title">Section A — Multiple Choice Questions</div><div class="section-marks">5 Questions · 1 Mark Each</div></div></div>
-<div class="q-card" id="qcard-1"><div class="q-num">Question 1</div><div class="q-text">Who did Indra ask to collect a bottle of dew?</div><div class="options"><label class="option"><input type="radio" name="q1" value="a"> a) A farmer</label><label class="option"><input type="radio" name="q1" value="b"> b) A young man</label><label class="option"><input type="radio" name="q1" value="c"> c) The children of his kingdom</label><label class="option"><input type="radio" name="q1" value="d"> d) A wise old woman</label></div><div class="feedback" id="fb-1"></div></div>
-<div class="q-card" id="qcard-2"><div class="q-num">Question 2</div><div class="q-text">Why was collecting dew in a bottle difficult?</div><div class="options"><label class="option"><input type="radio" name="q2" value="a"> a) Dew is very heavy</label><label class="option"><input type="radio" name="q2" value="b"> b) Dew disappears quickly when the sun rises</label><label class="option"><input type="radio" name="q2" value="c"> c) Dew only forms in winter</label><label class="option"><input type="radio" name="q2" value="d"> d) Dew has no smell or colour</label></div><div class="feedback" id="fb-2"></div></div>
-<div class="q-card" id="qcard-3"><div class="q-num">Question 3</div><div class="q-text">What lesson does the story teach us?</div><div class="options"><label class="option"><input type="radio" name="q3" value="a"> a) We should always obey elders</label><label class="option"><input type="radio" name="q3" value="b"> b) Hard work and honesty bring true reward</label><label class="option"><input type="radio" name="q3" value="c"> c) Collecting dew is very important</label><label class="option"><input type="radio" name="q3" value="d"> d) Kings are always right</label></div><div class="feedback" id="fb-3"></div></div>
-<div class="q-card" id="qcard-4"><div class="q-num">Question 4</div><div class="q-text">Dew drops are found on leaves and grass in the ______.</div><div class="options"><label class="option"><input type="radio" name="q4" value="a"> a) Afternoon</label><label class="option"><input type="radio" name="q4" value="b"> b) Night</label><label class="option"><input type="radio" name="q4" value="c"> c) Early morning</label><label class="option"><input type="radio" name="q4" value="d"> d) Evening</label></div><div class="feedback" id="fb-4"></div></div>
-<div class="q-card" id="qcard-5"><div class="q-num">Question 5</div><div class="q-text">Who finally succeeded in the task given by Indra?</div><div class="options"><label class="option"><input type="radio" name="q5" value="a"> a) The eldest son</label><label class="option"><input type="radio" name="q5" value="b"> b) The richest person</label><label class="option"><input type="radio" name="q5" value="c"> c) The honest and hardworking person</label><label class="option"><input type="radio" name="q5" value="d"> d) The King's soldier</label></div><div class="feedback" id="fb-5"></div></div>
-<div class="section-header"><div class="section-icon fill">🟠</div><div><div class="section-title">Section B — Fill in the Blanks</div><div class="section-marks">5 Questions · 1 Mark Each</div></div></div>
-<div class="q-card" id="qcard-6"><div class="q-num">Question 6</div><div class="q-text">Dew is formed when water vapour <input class="fill-input" id="fill-6" placeholder="______" autocomplete="off"> on cool surfaces.</div><div class="feedback" id="fb-6"></div></div>
-<div class="q-card" id="qcard-7"><div class="q-num">Question 7</div><div class="q-text">Indra is the king of the <input class="fill-input" id="fill-7" placeholder="______" autocomplete="off">.</div><div class="feedback" id="fb-7"></div></div>
-<div class="q-card" id="qcard-8"><div class="q-num">Question 8</div><div class="q-text">Dew drops look like shining <input class="fill-input" id="fill-8" placeholder="______" autocomplete="off"> on the grass.</div><div class="feedback" id="fb-8"></div></div>
-<div class="q-card" id="qcard-9"><div class="q-num">Question 9</div><div class="q-text">The story is from the NCERT book called <input class="fill-input" id="fill-9" placeholder="______" autocomplete="off">.</div><div class="feedback" id="fb-9"></div></div>
-<div class="q-card" id="qcard-10"><div class="q-num">Question 10</div><div class="q-text">Dew disappears when the <input class="fill-input" id="fill-10" placeholder="______" autocomplete="off"> rises in the morning.</div><div class="feedback" id="fb-10"></div></div>
-<div class="section-header"><div class="section-icon tf">🟣</div><div><div class="section-title">Section C — True or False</div><div class="section-marks">5 Questions · 1 Mark Each</div></div></div>
-<div class="q-card" id="qcard-11"><div class="q-num">Question 11</div><div class="q-text">Dew is a form of water found on leaves in the morning.</div><div class="tf-options"><button class="tf-btn" onclick="tfAnswer(11,true,true)">✅ True</button><button class="tf-btn" onclick="tfAnswer(11,false,true)">❌ False</button></div><div class="feedback" id="fb-11"></div></div>
-<div class="q-card" id="qcard-12"><div class="q-num">Question 12</div><div class="q-text">In the story, Indra was a farmer who lived in a village.</div><div class="tf-options"><button class="tf-btn" onclick="tfAnswer(12,true,false)">✅ True</button><button class="tf-btn" onclick="tfAnswer(12,false,false)">❌ False</button></div><div class="feedback" id="fb-12"></div></div>
-<div class="q-card" id="qcard-13"><div class="q-num">Question 13</div><div class="q-text">The task teaches us the value of patience and hard work.</div><div class="tf-options"><button class="tf-btn" onclick="tfAnswer(13,true,true)">✅ True</button><button class="tf-btn" onclick="tfAnswer(13,false,true)">❌ False</button></div><div class="feedback" id="fb-13"></div></div>
-<div class="q-card" id="qcard-14"><div class="q-num">Question 14</div><div class="q-text">Dew can be stored easily for a long time in a bottle.</div><div class="tf-options"><button class="tf-btn" onclick="tfAnswer(14,true,false)">✅ True</button><button class="tf-btn" onclick="tfAnswer(14,false,false)">❌ False</button></div><div class="feedback" id="fb-14"></div></div>
-<div class="q-card" id="qcard-15"><div class="q-num">Question 15</div><div class="q-text">This chapter is in the NCERT Poorvi textbook for Class 6.</div><div class="tf-options"><button class="tf-btn" onclick="tfAnswer(15,true,true)">✅ True</button><button class="tf-btn" onclick="tfAnswer(15,false,true)">❌ False</button></div><div class="feedback" id="fb-15"></div></div>
-<div class="submit-wrap"><button class="submit-btn" onclick="submitTest()">📩 Submit Worksheet</button></div>
-<div id="result-card"><div class="result-emoji" id="result-emoji"></div><div class="result-score" id="result-score"></div><div class="result-msg" id="result-msg"></div><button class="retry-btn" onclick="retryTest()">🔄 Try Again</button></div>
-<footer>Made with ❤️ by Shreya Ma'am · Bal Vidya Mandir, Sambhal · Class VI English</footer>
+
 <script>
-const mcqAnswers={q1:'c',q2:'b',q3:'b',q4:'c',q5:'c'};
-const fillAnswers={6:['condenses','condensed'],7:['gods','heaven','devtas'],8:['pearls','diamonds','gems'],9:['poorvi'],10:['sun']};
-const tfDone={};let score=0;let submitted=false;
-function tfAnswer(qNum,chosen,correct){
-  if(submitted||tfDone[qNum]!==undefined)return;
-  tfDone[qNum]=chosen;
-  const btns=document.querySelectorAll(`#qcard-${qNum} .tf-btn`);
-  const fb=document.getElementById(`fb-${qNum}`);
-  const card=document.getElementById(`qcard-${qNum}`);
-  btns.forEach(b=>b.disabled=true);
-  if(chosen===correct){btns[correct?0:1].classList.add('selected-correct');fb.textContent='✅ Correct!';fb.className='feedback correct-fb';card.classList.add('correct');}
-  else{btns[chosen?0:1].classList.add('selected-wrong');btns[correct?0:1].classList.add('show-correct');fb.textContent=`❌ Wrong! Correct: ${correct?'True':'False'}`;fb.className='feedback incorrect-fb';card.classList.add('incorrect');}
+const DATA = [
+  {
+    title: "A Bottle of Dew",
+    mcq: [
+      { q: "Who was Rama Natha?", options: ["A farmer", "A rich landlord's son", "A merchant", "A sage"], correct: 1 },
+      { q: "What did Rama Natha believe in?", options: ["A potion that turns objects into gold", "Magic spells", "Hard work", "Farming techniques"], correct: 0 },
+      { q: "What did Rama Natha do with his inherited land?", options: ["Worked hard on it", "Sold it", "Ignored it", "Gave it to his wife"], correct: 2 },
+      { q: "Who did Rama Natha meet in his town?", options: ["A wise merchant", "A goldsmith", "A scientist", "A famous sage named Mahipati"], correct: 3 },
+      { q: "What did the sage tell Rama Natha about the potion?", options: ["It could be found in the forest", "It could turn objects into gold", "It was hidden in the mountains", "It was already in his home"], correct: 3 }
+    ],
+    fib: [
+      { text: "Rama Natha was the son of a ____ landlord.", answer: "rich" },
+      { text: "The sage asked Rama Natha to plant ____ trees.", answer: "banana" },
+      { text: "Rama Natha had to collect ____ litres of dew.", answer: "100" }
+    ],
+    tf: [
+      { text: "Rama Natha believed in a magic potion that could turn any object into silver.", answer: false },
+      { text: "Madhumati helped Rama Natha by selling the bananas.", answer: true },
+      { text: "The sage asked Rama Natha to collect honey.", answer: false }
+    ]
+  },
+  {
+    title: "The Raven and the Fox",
+    mcq: [
+      { q: "What did the raven have in its beak?", options: ["A fruit", "A morsel of food", "A stick", "A feather"], correct: 1 },
+      { q: "Who admired the raven in the poem?", options: ["The owl", "The crow", "The fox", "The deer"], correct: 2 },
+      { q: "What did the fox praise the raven for?", options: ["Its flying skills", "Its eyes", "Its beak", "Its feathers"], correct: 3 },
+      { q: "What did the fox suggest the raven should do to become king?", options: ["Sing", "Dance", "Fly higher", "Speak loudly"], correct: 0 },
+      { q: "What was the raven's reaction to the fox's praise?", options: ["It ignored the fox", "It felt proud and opened its beak", "It flew away", "It ate the morsel"], correct: 1 },
+      { q: "What happened when the raven opened its beak?", options: ["It dropped the morsel", "It sang beautifully", "It flew away", "It gave the morsel to the fox"], correct: 0 },
+      { q: "Who took the morsel after it fell?", options: ["The owl", "The deer", "The fox", "The raven"], correct: 2 },
+      { q: "What lesson did the fox teach the raven?", options: ["To be careful of its singing", "Not to trust anyone", "Not to be proud and flattered by compliments", "To share food with others"], correct: 2 },
+      { q: "What was the moral of the story?", options: ["Don't trust anyone", "Share your food with others", "Always sing loudly", "Don't be fooled by flattery"], correct: 3 }
+    ],
+    fib: [
+      { text: "Mr. Raven is a ____.", answer: "bird" },
+      { text: "The name of the fox is ____.", answer: "Reynard" },
+      { text: "Mr. Raven was perched upon a ____.", answer: "tree" }
+    ],
+    tf: [
+      { text: "The Raven was sitting on a wall.", answer: false },
+      { text: "The fox starts his flattery by praising the raven's appearance.", answer: true },
+      { text: "The Raven's voice was melodious.", answer: false },
+      { text: "The Fox feels guilty after tricking the Raven and apologises.", answer: false }
+    ]
+  },
+  {
+    title: "Rama to the Rescue",
+    mcq: [
+      { q: "Who was Rama in the story?", options: ["The couple's son", "The village kotwal", "The thief", "A passerby"], correct: 1 },
+      { q: "What alerted the couple to the presence of the thief?", options: ["Rama's warning", "Noise from outside", "A dog barking", "A neighbor's call"], correct: 1 },
+      { q: "What was the couple's reaction upon suspecting a thief?", options: ["They screamed for help", "They ran out of the house", "They devised a clever plan", "They attacked the thief"], correct: 2 },
+      { q: "What did the thief hope to find?", options: ["Jewelry", "Documents", "Food", "Money"], correct: 3 },
+      { q: "What was the couple pretending to discuss?", options: ["Naming their child", "Buying new furniture", "Calling Rama for help", "A festival plan"], correct: 2 },
+      { q: "How did the couple plan to alert Rama?", options: ["By lighting a lamp", "By calling his name loudly", "By writing a note", "By making noise"], correct: 1 },
+      { q: "What made Rama come to the house?", options: ["He saw the thief entering", "A neighbor alerted him", "He was patrolling nearby", "The couple called his name loudly"], correct: 3 },
+      { q: "What does the story teach us?", options: ["Strength is more important than wit", "Trusting strangers is good", "Cleverness can save us in tough situations", "Always call the police"], correct: 2 }
+    ],
+    fib: [
+      { text: "The couple heard strange noise coming from ____ their house.", answer: "outside" },
+      { text: "____ was the village kotwal.", answer: "Rama" },
+      { text: "The thief was trying to get into the ____.", answer: "house" }
+    ],
+    tf: [
+      { text: "The man tells his plan to his wife.", answer: true },
+      { text: "The thief wants to know where they kept their jewels.", answer: false },
+      { text: "The thief wants to know where they kept their money.", answer: true }
+    ]
+  }
+];
+
+const container = document.getElementById('chapters');
+let totalQuestions = 0;
+let answeredCount = 0;
+
+DATA.forEach((chapter, ci) => {
+  totalQuestions += chapter.mcq.length + chapter.fib.length + chapter.tf.length;
+
+  const chapterEl = document.createElement('div');
+  chapterEl.className = 'chapter';
+  chapterEl.id = `chapter-${ci}`;
+
+  const head = document.createElement('button');
+  head.className = 'chapter-head';
+  head.innerHTML = `
+    <div>
+      <div class="num">CHAPTER ${ci + 1}</div>
+      <h2>${chapter.title}</h2>
+    </div>
+    <div class="chevron">&#9662;</div>
+  `;
+  head.addEventListener('click', () => {
+    chapterEl.classList.toggle('open');
+  });
+
+  const body = document.createElement('div');
+  body.className = 'chapter-body';
+
+  const inner = document.createElement('div');
+  inner.className = 'chapter-inner';
+
+  // MCQs
+  const mcqLabel = document.createElement('div');
+  mcqLabel.className = 'section-label';
+  mcqLabel.textContent = 'Multiple Choice Questions';
+  inner.appendChild(mcqLabel);
+
+  chapter.mcq.forEach((item, qi) => {
+    const qWrap = document.createElement('div');
+    qWrap.className = 'q';
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.innerHTML = `<span class="qn">${qi + 1}.</span>${item.q}`;
+    qWrap.appendChild(qText);
+
+    const optsWrap = document.createElement('div');
+    optsWrap.className = 'options';
+
+    const buttons = [];
+    item.options.forEach((optText, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = optText;
+      btn.addEventListener('click', () => {
+        if (btn.dataset.answered) return;
+        buttons.forEach(b => b.dataset.answered = "1");
+        if (oi === item.correct) {
+          btn.classList.add('selected-correct');
+        } else {
+          btn.classList.add('selected-wrong');
+          buttons[item.correct].classList.add('reveal-correct');
+        }
+        answeredCount++;
+        updateProgress();
+      });
+      buttons.push(btn);
+      optsWrap.appendChild(btn);
+    });
+
+    qWrap.appendChild(optsWrap);
+    inner.appendChild(qWrap);
+  });
+
+  // Fill in the blanks
+  const fibLabel = document.createElement('div');
+  fibLabel.className = 'section-label';
+  fibLabel.textContent = 'Fill in the Blanks';
+  inner.appendChild(fibLabel);
+
+  chapter.fib.forEach((item, fi) => {
+    const qWrap = document.createElement('div');
+    qWrap.className = 'q';
+
+    const row = document.createElement('div');
+    row.className = 'fib-row';
+
+    const [before, after] = item.text.split('____');
+    const numSpan = document.createElement('span');
+    numSpan.innerHTML = `<span class="qn">${fi + 1}.</span>${before}`;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'type answer';
+
+    const afterSpan = document.createElement('span');
+    afterSpan.textContent = after;
+
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'fib-check';
+    checkBtn.textContent = 'Check';
+
+    const answerSpan = document.createElement('span');
+    answerSpan.className = 'fib-answer';
+
+    checkBtn.addEventListener('click', () => {
+      if (checkBtn.dataset.answered) return;
+      const userVal = input.value.trim().toLowerCase();
+      const correctVal = item.answer.toLowerCase();
+      if (userVal === correctVal) {
+        input.classList.add('fib-correct');
+        answerSpan.textContent = '✓ correct';
+      } else {
+        input.classList.add('fib-wrong');
+        answerSpan.textContent = `✗ answer: ${item.answer}`;
+      }
+      input.disabled = true;
+      checkBtn.dataset.answered = "1";
+      checkBtn.style.display = 'none';
+      answeredCount++;
+      updateProgress();
+    });
+
+    row.appendChild(numSpan);
+    row.appendChild(input);
+    row.appendChild(afterSpan);
+    row.appendChild(checkBtn);
+    row.appendChild(answerSpan);
+    qWrap.appendChild(row);
+    inner.appendChild(qWrap);
+  });
+
+  // True or False
+  const tfLabel = document.createElement('div');
+  tfLabel.className = 'section-label';
+  tfLabel.textContent = 'True or False';
+  inner.appendChild(tfLabel);
+
+  chapter.tf.forEach((item, ti) => {
+    const qWrap = document.createElement('div');
+    qWrap.className = 'q';
+
+    const row = document.createElement('div');
+    row.className = 'tf-row';
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.style.marginBottom = '0';
+    qText.innerHTML = `<span class="qn">${ti + 1}.</span>${item.text}`;
+
+    const btnsWrap = document.createElement('div');
+    btnsWrap.className = 'tf-buttons';
+
+    const trueBtn = document.createElement('button');
+    trueBtn.className = 'tf-btn';
+    trueBtn.textContent = 'True';
+
+    const falseBtn = document.createElement('button');
+    falseBtn.className = 'tf-btn';
+    falseBtn.textContent = 'False';
+
+    function handleTF(selectedValue, selectedBtn, otherBtn) {
+      if (trueBtn.dataset.answered) return;
+      trueBtn.dataset.answered = "1";
+      falseBtn.dataset.answered = "1";
+      if (selectedValue === item.answer) {
+        selectedBtn.classList.add('tf-selected-correct');
+      } else {
+        selectedBtn.classList.add('tf-selected-wrong');
+        otherBtn.classList.add('tf-reveal');
+      }
+      answeredCount++;
+      updateProgress();
+    }
+
+    trueBtn.addEventListener('click', () => handleTF(true, trueBtn, falseBtn));
+    falseBtn.addEventListener('click', () => handleTF(false, falseBtn, trueBtn));
+
+    btnsWrap.appendChild(trueBtn);
+    btnsWrap.appendChild(falseBtn);
+    row.appendChild(qText);
+    row.appendChild(btnsWrap);
+    qWrap.appendChild(row);
+    inner.appendChild(qWrap);
+  });
+
+  body.appendChild(inner);
+  chapterEl.appendChild(head);
+  chapterEl.appendChild(body);
+  container.appendChild(chapterEl);
+});
+
+// Open first chapter by default
+document.getElementById('chapter-0').classList.add('open');
+
+function updateProgress() {
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  const pct = totalQuestions ? (answeredCount / totalQuestions) * 100 : 0;
+  fill.style.width = pct + '%';
+  label.textContent = `${answeredCount} of ${totalQuestions} answered`;
 }
-function submitTest(){
-  if(submitted)return;submitted=true;score=0;
-  for(let i=1;i<=5;i++){
-    const sel=document.querySelector(`input[name="q${i}"]:checked`);
-    const fb=document.getElementById(`fb-${i}`);
-    const card=document.getElementById(`qcard-${i}`);
-    const opts=document.querySelectorAll(`#qcard-${i} .option`);
-    opts.forEach(o=>{o.style.pointerEvents='none';});
-    if(sel){const correct=mcqAnswers[`q${i}`];
-      if(sel.value===correct){sel.closest('.option').classList.add('selected-correct');fb.textContent='✅ Correct!';fb.className='feedback correct-fb';card.classList.add('correct');score++;}
-      else{sel.closest('.option').classList.add('selected-wrong');opts.forEach(o=>{if(o.querySelector('input').value===correct)o.classList.add('show-correct');});fb.textContent=`❌ Wrong!`;fb.className='feedback incorrect-fb';card.classList.add('incorrect');}
-    }else{fb.textContent='⚠️ Not attempted.';fb.className='feedback incorrect-fb';}
-  }
-  for(let i=6;i<=10;i++){
-    const inp=document.getElementById(`fill-${i}`);
-    const fb=document.getElementById(`fb-${i}`);
-    const card=document.getElementById(`qcard-${i}`);
-    const val=inp.value.trim().toLowerCase();
-    inp.disabled=true;
-    const accepted=fillAnswers[i];
-    if(accepted.some(a=>val===a||val.includes(a))){inp.classList.add('correct-ans');fb.textContent='✅ Correct!';fb.className='feedback correct-fb';card.classList.add('correct');score++;}
-    else{inp.classList.add('wrong-ans');fb.textContent=`❌ Answer: ${accepted[0]}`;fb.className='feedback incorrect-fb';card.classList.add('incorrect');}
-  }
-  const correctMap={11:true,12:false,13:true,14:false,15:true};
-  for(let i=11;i<=15;i++){
-    if(tfDone[i]!==undefined){if(tfDone[i]===correctMap[i])score++;}
-    else{const fb=document.getElementById(`fb-${i}`);fb.textContent='⚠️ Not attempted.';fb.className='feedback incorrect-fb';}
-  }
-  const card=document.getElementById('result-card');
-  const pct=(score/15)*100;
-  document.getElementById('result-score').textContent=`${score} / 15`;
-  if(pct>=60){card.className='pass';document.getElementById('result-emoji').textContent=pct===100?'🏆':'🎉';document.getElementById('result-msg').textContent=pct===100?'Perfect! Excellent!':pct>=80?'Great job!':'Good effort!';}
-  else{card.className='fail';document.getElementById('result-emoji').textContent='📚';document.getElementById('result-msg').textContent='Keep revising!';}
-  card.style.display='block';card.scrollIntoView({behavior:'smooth'});
-}
-function retryTest(){location.reload();}
-const today=new Date();
-document.getElementById('stu-date').value=`${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+
+updateProgress();
 </script>
+
 </body>
 </html>
-
-    
