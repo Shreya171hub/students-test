@@ -3,636 +3,515 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chapter Practice Quiz</title>
+<title>Communication Lab Register — Bal Vidya Mandir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --paper: #FBF7EE;
-    --ink: #2B2620;
-    --rule: #D8CBB0;
-    --moss: #3F6B4F;
-    --moss-dark: #2E4F39;
-    --clay: #B5562D;
-    --gold: #C8932B;
-    --card: #FFFFFF;
-    --wrong: #B5562D;
-    --right: #3F6B4F;
+  :root{
+    --ink:#1B2A4A;
+    --ink-soft:#324066;
+    --paper:#FBF7EF;
+    --paper-line:#E7DFCC;
+    --marigold:#E39B34;
+    --marigold-deep:#C97F1E;
+    --sage:#6E8F72;
+    --terracotta:#C9694A;
+    --slate:#3B4657;
+    --slate-soft:#6B7688;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px);
+    background-size: 100% 42px;
+    color:var(--slate);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* ---------- Header / Hero ---------- */
+  header.hero{
+    background: var(--ink);
+    background-image: radial-gradient(circle at 85% -10%, rgba(227,155,52,0.25), transparent 55%);
+    color:#F4EFE2;
+    padding: 44px 24px 34px;
+    border-bottom: 6px solid var(--marigold);
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--marigold);
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Lora',serif;
+    font-weight:700;
+    font-size:clamp(28px,5vw,42px);
+    line-height:1.1;
+    margin:0 0 10px;
+  }
+  .hero-sub{
+    font-size:15px;
+    color:#CBD3E4;
+    max-width:560px;
+    line-height:1.5;
+  }
+  .hero-meta{
+    margin-top:22px;
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:#A9B4CC;
+  }
+  .hero-meta b{color:#F4EFE2;font-weight:600;}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    max-width:920px;
+    margin:-22px auto 0;
+    padding:0 20px;
+    position:relative;
+    z-index:2;
+  }
+  .control-card{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    box-shadow:0 10px 30px -18px rgba(27,42,74,0.35);
+    padding:18px;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    font-family:'Lora',serif;
+    font-weight:600;
+    font-size:14px;
+    padding:9px 16px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:var(--paper);
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  .tab-btn:hover{border-color:var(--marigold);}
+  .tab-btn.active{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:#F4EFE2;
+  }
+  .search-row{
+    display:flex;
+    gap:10px;
+  }
+  input[type="text"]{
+    flex:1;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:11px 14px;
+    border-radius:7px;
+    border:1px solid var(--paper-line);
+    background:var(--paper);
+    color:var(--slate);
+    outline:none;
+  }
+  input[type="text"]:focus{border-color:var(--marigold-deep);box-shadow:0 0 0 3px rgba(227,155,52,0.18);}
+  .count-pill{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--slate-soft);
+    align-self:center;
+    white-space:nowrap;
   }
 
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: 'Georgia', 'Iowan Old Style', serif;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
+  /* ---------- Main list ---------- */
+  main{
+    max-width:920px;
+    margin:0 auto;
+    padding:26px 20px 70px;
+  }
+  .status-msg{
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    color:var(--slate-soft);
+    text-align:center;
+    padding:50px 20px;
+    border:1px dashed var(--paper-line);
+    border-radius:10px;
+    background:var(--card);
+    line-height:1.6;
+  }
+  .status-msg code{
+    background:var(--paper);
+    padding:2px 6px;
+    border-radius:4px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--terracotta);
   }
 
-  .wrap {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 32px 20px 80px;
+  .student-card{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .student-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:15px 18px;
+    cursor:pointer;
+  }
+  .roll-badge{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    background:var(--paper);
+    border:1px solid var(--paper-line);
+    border-radius:6px;
+    padding:4px 8px;
+    min-width:34px;
+    text-align:center;
+  }
+  .student-name{
+    font-family:'Lora',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--ink);
+    flex:1;
+  }
+  .session-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    color:var(--slate-soft);
+  }
+  .chevron{
+    font-size:13px;
+    color:var(--slate-soft);
+    transition:transform .18s ease;
+  }
+  .student-card.open .chevron{transform:rotate(90deg);}
+
+  .sessions{
+    display:none;
+    border-top:1px solid var(--paper-line);
+    padding:6px 18px 16px;
+  }
+  .student-card.open .sessions{display:block;}
+
+  .session-row{
+    display:grid;
+    grid-template-columns: 90px 1fr auto;
+    gap:12px;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .session-row:last-child{border-bottom:none;}
+  .session-date{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--slate-soft);
+  }
+  .session-topic{
+    font-size:13.5px;
+    color:var(--slate);
+  }
+  .session-topic .activity{
+    display:block;
+    font-family:'Lora',serif;
+    font-style:italic;
+    font-size:12.5px;
+    color:var(--slate-soft);
+    margin-top:2px;
+  }
+  .score-block{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .score-num{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:15px;
+    color:var(--ink);
+    min-width:52px;
+    text-align:right;
+  }
+  .level-chip{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    white-space:nowrap;
+  }
+  .level-outstanding{background:rgba(110,143,114,0.15); color:#4C6B50;}
+  .level-proficient{background:rgba(227,155,52,0.18); color:var(--marigold-deep);}
+  .level-developing{background:rgba(201,127,30,0.14); color:#9C5F16;}
+  .level-basic{background:rgba(201,105,74,0.15); color:var(--terracotta);}
+  .level-emerging{background:rgba(201,105,74,0.25); color:#8C3F27;}
+  .remarks{
+    grid-column:1 / -1;
+    font-size:12.5px;
+    color:var(--slate-soft);
+    padding-top:4px;
+    font-style:italic;
   }
 
-  header.top {
-    text-align: center;
-    margin-bottom: 36px;
+  footer{
+    text-align:center;
+    padding:26px 20px 40px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    color:var(--slate-soft);
   }
 
-  header.top .eyebrow {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    font-size: 11px;
-    color: var(--clay);
-    font-weight: 600;
-  }
-
-  header.top h1 {
-    font-size: 32px;
-    margin: 8px 0 6px;
-    font-weight: 700;
-  }
-
-  header.top p {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px;
-    color: #6b6254;
-    margin: 0;
-  }
-
-  .progress-bar {
-    position: sticky;
-    top: 0;
-    background: var(--paper);
-    padding: 10px 0 14px;
-    z-index: 10;
-    border-bottom: 1px solid var(--rule);
-    margin-bottom: 24px;
-  }
-
-  .progress-track {
-    height: 6px;
-    background: var(--rule);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--moss);
-    width: 0%;
-    transition: width 0.4s ease;
-  }
-
-  .progress-label {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    color: #6b6254;
-    margin-top: 6px;
-    text-align: right;
-  }
-
-  .chapter {
-    background: var(--card);
-    border: 1px solid var(--rule);
-    border-radius: 10px;
-    margin-bottom: 22px;
-    overflow: hidden;
-  }
-
-  .chapter-head {
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    padding: 18px 22px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .chapter-head .num {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--clay);
-    font-weight: 700;
-  }
-
-  .chapter-head h2 {
-    font-size: 19px;
-    margin: 2px 0 0;
-  }
-
-  .chapter-head .chevron {
-    font-size: 18px;
-    color: var(--moss);
-    transition: transform 0.25s ease;
-    flex-shrink: 0;
-  }
-
-  .chapter.open .chevron { transform: rotate(180deg); }
-
-  .chapter-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s ease;
-  }
-
-  .chapter.open .chapter-body {
-    max-height: none;
-  }
-
-  .chapter-inner {
-    padding: 0 22px 24px;
-    border-top: 1px solid var(--rule);
-  }
-
-  .section-label {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--moss-dark);
-    font-weight: 700;
-    margin: 26px 0 12px;
-    padding-top: 4px;
-  }
-
-  .q {
-    margin-bottom: 18px;
-  }
-
-  .q-text {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-
-  .q-text .qn {
-    color: var(--clay);
-    font-weight: 700;
-    margin-right: 4px;
-  }
-
-  .options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .opt {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    text-align: left;
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    border-radius: 7px;
-    padding: 10px 14px;
-    font-size: 14.5px;
-    color: var(--ink);
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-
-  .opt:hover { border-color: var(--moss); }
-
-  .opt.selected-correct {
-    background: #E7F0E5;
-    border-color: var(--right);
-    color: var(--moss-dark);
-    font-weight: 600;
-  }
-
-  .opt.selected-wrong {
-    background: #F6E6DD;
-    border-color: var(--wrong);
-    color: var(--clay);
-  }
-
-  .opt.reveal-correct {
-    border-color: var(--right);
-    border-style: dashed;
-  }
-
-  .opt:disabled { cursor: default; }
-
-  /* Fill in the blank */
-  .fib-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-size: 16px;
-  }
-
-  .fib-row input {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    border: none;
-    border-bottom: 2px solid var(--gold);
-    background: transparent;
-    font-size: 15px;
-    padding: 3px 4px;
-    width: 160px;
-    color: var(--ink);
-  }
-
-  .fib-row input:focus { outline: none; border-bottom-color: var(--clay); }
-
-  .fib-row input.fib-correct { border-bottom-color: var(--right); color: var(--moss-dark); }
-  .fib-row input.fib-wrong { border-bottom-color: var(--wrong); color: var(--clay); }
-
-  .fib-check, .tf-check {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12.5px;
-    border: 1px solid var(--moss);
-    color: var(--moss-dark);
-    background: none;
-    border-radius: 6px;
-    padding: 5px 10px;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .fib-check:hover, .tf-check:hover { background: #E7F0E5; }
-
-  .fib-answer {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 13px;
-    color: var(--moss-dark);
-    margin-left: 4px;
-  }
-
-  /* True/False */
-  .tf-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .tf-buttons {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  .tf-btn {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    border: 1px solid var(--rule);
-    background: var(--paper);
-    border-radius: 7px;
-    padding: 8px 16px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-
-  .tf-btn.tf-selected-correct { background: #E7F0E5; border-color: var(--right); color: var(--moss-dark); font-weight: 600; }
-  .tf-btn.tf-selected-wrong { background: #F6E6DD; border-color: var(--wrong); color: var(--clay); }
-  .tf-btn.tf-reveal { border-color: var(--right); border-style: dashed; }
-
-  .chapter-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 28px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--rule);
-  }
-
-  .score-pill {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 13px;
-    color: var(--moss-dark);
-    background: #E7F0E5;
-    border-radius: 20px;
-    padding: 6px 14px;
-  }
-
-  .reset-btn {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 13px;
-    background: none;
-    border: 1px solid var(--rule);
-    color: #6b6254;
-    border-radius: 20px;
-    padding: 6px 14px;
-    cursor: pointer;
-  }
-
-  .reset-btn:hover { border-color: var(--clay); color: var(--clay); }
-
-  footer.page-footer {
-    text-align: center;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    color: #9c9384;
-    margin-top: 40px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+  @media (max-width:520px){
+    .session-row{grid-template-columns: 70px 1fr;}
+    .score-block{grid-column:1/-1; justify-content:flex-start; padding-top:4px;}
   }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-
-  <header class="top">
-    <div class="eyebrow">English Reader · Practice Worksheet</div>
-    <h1>Chapter Practice Quiz</h1>
-    <p>Tap a chapter to begin. Tap an option to answer — it checks itself.</p>
-  </header>
-
-  <div class="progress-bar">
-    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-label" id="progressLabel">0 of 0 answered</div>
+<header class="hero">
+  <div class="eyebrow">Bal Vidya Mandir Sr. Sec. School · Sambhal</div>
+  <h1>Communication Lab Register</h1>
+  <p class="hero-sub">Sanako Study speaking-assessment scores, session by session, for Classes VI–VIII. Pick a class register below and search a student's name.</p>
+  <div class="hero-meta">
+    <span>Rubric &nbsp;<b>Outstanding 90–100% · Proficient 75–89% · Developing 60–74% · Basic 40–59% · Emerging &lt;40%</b></span>
   </div>
+</header>
 
-  <div id="chapters"></div>
-
-  <footer class="page-footer">Practice worksheet · 3 chapters</footer>
+<div class="controls">
+  <div class="control-card">
+    <div class="tabs" id="classTabs">
+      <button class="tab-btn active" data-class="VI">VI · Creators</button>
+      <button class="tab-btn" data-class="VII">VII · Explorers</button>
+      <button class="tab-btn" data-class="VIII">VIII · Explorers</button>
+    </div>
+    <div class="search-row">
+      <input type="text" id="searchBox" placeholder="Search by student name or roll no…">
+      <span class="count-pill" id="countPill">–</span>
+    </div>
+  </div>
 </div>
 
+<main id="mainArea">
+  <div class="status-msg">Loading register…</div>
+</main>
+
+<footer>Communication Lab Programme · Sanako Study · Middle Wing</footer>
+
 <script>
-const DATA = [
-  {
-    title: "A Bottle of Dew",
-    mcq: [
-      { q: "Who was Rama Natha?", options: ["A farmer", "A rich landlord's son", "A merchant", "A sage"], correct: 1 },
-      { q: "What did Rama Natha believe in?", options: ["A potion that turns objects into gold", "Magic spells", "Hard work", "Farming techniques"], correct: 0 },
-      { q: "What did Rama Natha do with his inherited land?", options: ["Worked hard on it", "Sold it", "Ignored it", "Gave it to his wife"], correct: 2 },
-      { q: "Who did Rama Natha meet in his town?", options: ["A wise merchant", "A goldsmith", "A scientist", "A famous sage named Mahipati"], correct: 3 },
-      { q: "What did the sage tell Rama Natha about the potion?", options: ["It could be found in the forest", "It could turn objects into gold", "It was hidden in the mountains", "It was already in his home"], correct: 3 }
-    ],
-    fib: [
-      { text: "Rama Natha was the son of a ____ landlord.", answer: "rich" },
-      { text: "The sage asked Rama Natha to plant ____ trees.", answer: "banana" },
-      { text: "Rama Natha had to collect ____ litres of dew.", answer: "100" }
-    ],
-    tf: [
-      { text: "Rama Natha believed in a magic potion that could turn any object into silver.", answer: false },
-      { text: "Madhumati helped Rama Natha by selling the bananas.", answer: true },
-      { text: "The sage asked Rama Natha to collect honey.", answer: false }
-    ]
-  },
-  {
-    title: "The Raven and the Fox",
-    mcq: [
-      { q: "What did the raven have in its beak?", options: ["A fruit", "A morsel of food", "A stick", "A feather"], correct: 1 },
-      { q: "Who admired the raven in the poem?", options: ["The owl", "The crow", "The fox", "The deer"], correct: 2 },
-      { q: "What did the fox praise the raven for?", options: ["Its flying skills", "Its eyes", "Its beak", "Its feathers"], correct: 3 },
-      { q: "What did the fox suggest the raven should do to become king?", options: ["Sing", "Dance", "Fly higher", "Speak loudly"], correct: 0 },
-      { q: "What was the raven's reaction to the fox's praise?", options: ["It ignored the fox", "It felt proud and opened its beak", "It flew away", "It ate the morsel"], correct: 1 },
-      { q: "What happened when the raven opened its beak?", options: ["It dropped the morsel", "It sang beautifully", "It flew away", "It gave the morsel to the fox"], correct: 0 },
-      { q: "Who took the morsel after it fell?", options: ["The owl", "The deer", "The fox", "The raven"], correct: 2 },
-      { q: "What lesson did the fox teach the raven?", options: ["To be careful of its singing", "Not to trust anyone", "Not to be proud and flattered by compliments", "To share food with others"], correct: 2 },
-      { q: "What was the moral of the story?", options: ["Don't trust anyone", "Share your food with others", "Always sing loudly", "Don't be fooled by flattery"], correct: 3 }
-    ],
-    fib: [
-      { text: "Mr. Raven is a ____.", answer: "bird" },
-      { text: "The name of the fox is ____.", answer: "Reynard" },
-      { text: "Mr. Raven was perched upon a ____.", answer: "tree" }
-    ],
-    tf: [
-      { text: "The Raven was sitting on a wall.", answer: false },
-      { text: "The fox starts his flattery by praising the raven's appearance.", answer: true },
-      { text: "The Raven's voice was melodious.", answer: false },
-      { text: "The Fox feels guilty after tricking the Raven and apologises.", answer: false }
-    ]
-  },
-  {
-    title: "Rama to the Rescue",
-    mcq: [
-      { q: "Who was Rama in the story?", options: ["The couple's son", "The village kotwal", "The thief", "A passerby"], correct: 1 },
-      { q: "What alerted the couple to the presence of the thief?", options: ["Rama's warning", "Noise from outside", "A dog barking", "A neighbor's call"], correct: 1 },
-      { q: "What was the couple's reaction upon suspecting a thief?", options: ["They screamed for help", "They ran out of the house", "They devised a clever plan", "They attacked the thief"], correct: 2 },
-      { q: "What did the thief hope to find?", options: ["Jewelry", "Documents", "Food", "Money"], correct: 3 },
-      { q: "What was the couple pretending to discuss?", options: ["Naming their child", "Buying new furniture", "Calling Rama for help", "A festival plan"], correct: 2 },
-      { q: "How did the couple plan to alert Rama?", options: ["By lighting a lamp", "By calling his name loudly", "By writing a note", "By making noise"], correct: 1 },
-      { q: "What made Rama come to the house?", options: ["He saw the thief entering", "A neighbor alerted him", "He was patrolling nearby", "The couple called his name loudly"], correct: 3 },
-      { q: "What does the story teach us?", options: ["Strength is more important than wit", "Trusting strangers is good", "Cleverness can save us in tough situations", "Always call the police"], correct: 2 }
-    ],
-    fib: [
-      { text: "The couple heard strange noise coming from ____ their house.", answer: "outside" },
-      { text: "____ was the village kotwal.", answer: "Rama" },
-      { text: "The thief was trying to get into the ____.", answer: "house" }
-    ],
-    tf: [
-      { text: "The man tells his plan to his wife.", answer: true },
-      { text: "The thief wants to know where they kept their jewels.", answer: false },
-      { text: "The thief wants to know where they kept their money.", answer: true }
-    ]
-  }
-];
+/* =========================================================================
+   CONFIG — paste your published-CSV links here (one per class).
+   How to get a link:
+   1. In the class's Google Sheet, make one FLAT sheet/tab with these
+      columns (one row per session, per student):
+      Student Name | Roll No | Date | Lab Activity | Topic | Listening (/4)
+      | Speaking (/5) | Group Discussion (/3) | Pronunciation (/3)
+      | Fluency (/3) | Accuracy (/2) | Total (/20) | Percentage | Level | Remarks
+   2. File > Share > Publish to web
+   3. Choose that specific sheet/tab, format: Comma-separated values (.csv)
+   4. Click Publish, copy the link, paste it below between the quotes.
+   ========================================================================= */
+const CONFIG = {
+  VI:   "",   // <-- paste Class VI Creators published CSV link here
+  VII:  "",   // <-- paste Class VII Explorers published CSV link here
+  VIII: ""    // <-- paste Class VIII Explorers published CSV link here
+};
 
-const container = document.getElementById('chapters');
-let totalQuestions = 0;
-let answeredCount = 0;
+let currentClass = "VI";
+let dataCache = {};
 
-DATA.forEach((chapter, ci) => {
-  totalQuestions += chapter.mcq.length + chapter.fib.length + chapter.tf.length;
-
-  const chapterEl = document.createElement('div');
-  chapterEl.className = 'chapter';
-  chapterEl.id = `chapter-${ci}`;
-
-  const head = document.createElement('button');
-  head.className = 'chapter-head';
-  head.innerHTML = `
-    <div>
-      <div class="num">CHAPTER ${ci + 1}</div>
-      <h2>${chapter.title}</h2>
-    </div>
-    <div class="chevron">&#9662;</div>
-  `;
-  head.addEventListener('click', () => {
-    chapterEl.classList.toggle('open');
-  });
-
-  const body = document.createElement('div');
-  body.className = 'chapter-body';
-
-  const inner = document.createElement('div');
-  inner.className = 'chapter-inner';
-
-  // MCQs
-  const mcqLabel = document.createElement('div');
-  mcqLabel.className = 'section-label';
-  mcqLabel.textContent = 'Multiple Choice Questions';
-  inner.appendChild(mcqLabel);
-
-  chapter.mcq.forEach((item, qi) => {
-    const qWrap = document.createElement('div');
-    qWrap.className = 'q';
-
-    const qText = document.createElement('div');
-    qText.className = 'q-text';
-    qText.innerHTML = `<span class="qn">${qi + 1}.</span>${item.q}`;
-    qWrap.appendChild(qText);
-
-    const optsWrap = document.createElement('div');
-    optsWrap.className = 'options';
-
-    const buttons = [];
-    item.options.forEach((optText, oi) => {
-      const btn = document.createElement('button');
-      btn.className = 'opt';
-      btn.textContent = optText;
-      btn.addEventListener('click', () => {
-        if (btn.dataset.answered) return;
-        buttons.forEach(b => b.dataset.answered = "1");
-        if (oi === item.correct) {
-          btn.classList.add('selected-correct');
-        } else {
-          btn.classList.add('selected-wrong');
-          buttons[item.correct].classList.add('reveal-correct');
-        }
-        answeredCount++;
-        updateProgress();
-      });
-      buttons.push(btn);
-      optsWrap.appendChild(btn);
-    });
-
-    qWrap.appendChild(optsWrap);
-    inner.appendChild(qWrap);
-  });
-
-  // Fill in the blanks
-  const fibLabel = document.createElement('div');
-  fibLabel.className = 'section-label';
-  fibLabel.textContent = 'Fill in the Blanks';
-  inner.appendChild(fibLabel);
-
-  chapter.fib.forEach((item, fi) => {
-    const qWrap = document.createElement('div');
-    qWrap.className = 'q';
-
-    const row = document.createElement('div');
-    row.className = 'fib-row';
-
-    const [before, after] = item.text.split('____');
-    const numSpan = document.createElement('span');
-    numSpan.innerHTML = `<span class="qn">${fi + 1}.</span>${before}`;
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'type answer';
-
-    const afterSpan = document.createElement('span');
-    afterSpan.textContent = after;
-
-    const checkBtn = document.createElement('button');
-    checkBtn.className = 'fib-check';
-    checkBtn.textContent = 'Check';
-
-    const answerSpan = document.createElement('span');
-    answerSpan.className = 'fib-answer';
-
-    checkBtn.addEventListener('click', () => {
-      if (checkBtn.dataset.answered) return;
-      const userVal = input.value.trim().toLowerCase();
-      const correctVal = item.answer.toLowerCase();
-      if (userVal === correctVal) {
-        input.classList.add('fib-correct');
-        answerSpan.textContent = '✓ correct';
-      } else {
-        input.classList.add('fib-wrong');
-        answerSpan.textContent = `✗ answer: ${item.answer}`;
-      }
-      input.disabled = true;
-      checkBtn.dataset.answered = "1";
-      checkBtn.style.display = 'none';
-      answeredCount++;
-      updateProgress();
-    });
-
-    row.appendChild(numSpan);
-    row.appendChild(input);
-    row.appendChild(afterSpan);
-    row.appendChild(checkBtn);
-    row.appendChild(answerSpan);
-    qWrap.appendChild(row);
-    inner.appendChild(qWrap);
-  });
-
-  // True or False
-  const tfLabel = document.createElement('div');
-  tfLabel.className = 'section-label';
-  tfLabel.textContent = 'True or False';
-  inner.appendChild(tfLabel);
-
-  chapter.tf.forEach((item, ti) => {
-    const qWrap = document.createElement('div');
-    qWrap.className = 'q';
-
-    const row = document.createElement('div');
-    row.className = 'tf-row';
-
-    const qText = document.createElement('div');
-    qText.className = 'q-text';
-    qText.style.marginBottom = '0';
-    qText.innerHTML = `<span class="qn">${ti + 1}.</span>${item.text}`;
-
-    const btnsWrap = document.createElement('div');
-    btnsWrap.className = 'tf-buttons';
-
-    const trueBtn = document.createElement('button');
-    trueBtn.className = 'tf-btn';
-    trueBtn.textContent = 'True';
-
-    const falseBtn = document.createElement('button');
-    falseBtn.className = 'tf-btn';
-    falseBtn.textContent = 'False';
-
-    function handleTF(selectedValue, selectedBtn, otherBtn) {
-      if (trueBtn.dataset.answered) return;
-      trueBtn.dataset.answered = "1";
-      falseBtn.dataset.answered = "1";
-      if (selectedValue === item.answer) {
-        selectedBtn.classList.add('tf-selected-correct');
-      } else {
-        selectedBtn.classList.add('tf-selected-wrong');
-        otherBtn.classList.add('tf-reveal');
-      }
-      answeredCount++;
-      updateProgress();
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; } else { inQuotes = false; }
+      } else { field += c; }
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field=""; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else if(c === '\r'){ /* skip */ }
+      else { field += c; }
     }
-
-    trueBtn.addEventListener('click', () => handleTF(true, trueBtn, falseBtn));
-    falseBtn.addEventListener('click', () => handleTF(false, falseBtn, trueBtn));
-
-    btnsWrap.appendChild(trueBtn);
-    btnsWrap.appendChild(falseBtn);
-    row.appendChild(qText);
-    row.appendChild(btnsWrap);
-    qWrap.appendChild(row);
-    inner.appendChild(qWrap);
-  });
-
-  body.appendChild(inner);
-  chapterEl.appendChild(head);
-  chapterEl.appendChild(body);
-  container.appendChild(chapterEl);
-});
-
-// Open first chapter by default
-document.getElementById('chapter-0').classList.add('open');
-
-function updateProgress() {
-  const fill = document.getElementById('progressFill');
-  const label = document.getElementById('progressLabel');
-  const pct = totalQuestions ? (answeredCount / totalQuestions) * 100 : 0;
-  fill.style.width = pct + '%';
-  label.textContent = `${answeredCount} of ${totalQuestions} answered`;
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(cell => cell.trim() !== ""));
 }
 
-updateProgress();
+function levelClass(level){
+  const l = (level||"").toLowerCase();
+  if(l.includes("outstanding")) return "level-outstanding";
+  if(l.includes("proficient")) return "level-proficient";
+  if(l.includes("developing")) return "level-developing";
+  if(l.includes("basic")) return "level-basic";
+  if(l.includes("emerging")) return "level-emerging";
+  return "";
+}
+
+function groupByStudent(rows, headerMap){
+  const students = {};
+  rows.forEach(r => {
+    const name = (r[headerMap.name]||"").trim();
+    if(!name) return;
+    const roll = (r[headerMap.roll]||"").trim();
+    const key = roll + "|" + name.toLowerCase();
+    if(!students[key]){
+      students[key] = { name, roll, sessions: [] };
+    }
+    students[key].sessions.push({
+      date: r[headerMap.date]||"",
+      activity: r[headerMap.activity]||"",
+      topic: r[headerMap.topic]||"",
+      total: r[headerMap.total]||"",
+      pct: r[headerMap.pct]||"",
+      level: r[headerMap.level]||"",
+      remarks: r[headerMap.remarks]||""
+    });
+  });
+  return Object.values(students).sort((a,b) => (parseInt(a.roll)||0) - (parseInt(b.roll)||0));
+}
+
+function findHeaderMap(headerRow){
+  const idx = name => headerRow.findIndex(h => h.trim().toLowerCase().includes(name));
+  return {
+    name: idx("student name") >= 0 ? idx("student name") : idx("name"),
+    roll: idx("roll"),
+    date: idx("date"),
+    activity: idx("activity"),
+    topic: idx("topic"),
+    total: idx("total"),
+    pct: idx("percentage"),
+    level: idx("level"),
+    remarks: idx("remarks")
+  };
+}
+
+async function loadClass(cls){
+  const url = CONFIG[cls];
+  const mainArea = document.getElementById("mainArea");
+  const countPill = document.getElementById("countPill");
+
+  if(!url){
+    mainArea.innerHTML = `<div class="status-msg">
+      No data link connected for this class yet.<br><br>
+      Open <code>index.html</code>, find the <code>CONFIG</code> object near the bottom of the script,
+      and paste the published Google Sheets CSV link for <b>Class ${cls}</b> there.
+    </div>`;
+    countPill.textContent = "–";
+    return;
+  }
+
+  if(dataCache[cls]){
+    renderStudents(dataCache[cls]);
+    return;
+  }
+
+  mainArea.innerHTML = `<div class="status-msg">Loading Class ${cls} register…</div>`;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("Network response was not ok");
+    const text = await res.text();
+    const rows = parseCSV(text);
+    if(rows.length < 2){
+      mainArea.innerHTML = `<div class="status-msg">This sheet looks empty. Add session rows and refresh.</div>`;
+      return;
+    }
+    const header = rows[0];
+    const map = findHeaderMap(header);
+    const students = groupByStudent(rows.slice(1), map);
+    dataCache[cls] = students;
+    renderStudents(students);
+  } catch(err){
+    mainArea.innerHTML = `<div class="status-msg">
+      Could not load this class's data.<br><br>
+      Check that the sheet is published (File &gt; Share &gt; Publish to web) and the link in
+      <code>CONFIG</code> is correct.
+    </div>`;
+  }
+}
+
+function renderStudents(students, filter=""){
+  const mainArea = document.getElementById("mainArea");
+  const countPill = document.getElementById("countPill");
+  const f = filter.trim().toLowerCase();
+  const filtered = f
+    ? students.filter(s => s.name.toLowerCase().includes(f) || s.roll.toLowerCase().includes(f))
+    : students;
+
+  countPill.textContent = `${filtered.length} of ${students.length} students`;
+
+  if(filtered.length === 0){
+    mainArea.innerHTML = `<div class="status-msg">No student matches "${filter}".</div>`;
+    return;
+  }
+
+  mainArea.innerHTML = filtered.map((s, i) => {
+    const sessionsHtml = s.sessions.map(sess => `
+      <div class="session-row">
+        <div class="session-date">${sess.date || "—"}</div>
+        <div class="session-topic">${sess.topic || "—"}<span class="activity">${sess.activity || ""}</span></div>
+        <div class="score-block">
+          <span class="score-num">${sess.total || "–"}${sess.total ? "/20" : ""}</span>
+          ${sess.level ? `<span class="level-chip ${levelClass(sess.level)}">${sess.level}</span>` : ""}
+        </div>
+        ${sess.remarks ? `<div class="remarks">${sess.remarks}</div>` : ""}
+      </div>
+    `).join("");
+
+    return `
+      <div class="student-card" data-idx="${i}">
+        <div class="student-head" onclick="this.parentElement.classList.toggle('open')">
+          <span class="roll-badge">${s.roll || "–"}</span>
+          <span class="student-name">${s.name}</span>
+          <span class="session-count">${s.sessions.length} session${s.sessions.length===1?"":"s"}</span>
+          <span class="chevron">▸</span>
+        </div>
+        <div class="sessions">${sessionsHtml}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+document.getElementById("classTabs").addEventListener("click", e => {
+  const btn = e.target.closest(".tab-btn");
+  if(!btn) return;
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  currentClass = btn.dataset.class;
+  document.getElementById("searchBox").value = "";
+  loadClass(currentClass);
+});
+
+document.getElementById("searchBox").addEventListener("input", e => {
+  if(dataCache[currentClass]) renderStudents(dataCache[currentClass], e.target.value);
+});
+
+loadClass(currentClass);
 </script>
 
 </body>
